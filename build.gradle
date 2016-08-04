@@ -1,0 +1,5 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = 1.8
+mainClassName = 'io.github.scyptnex.lcalc.Main'
