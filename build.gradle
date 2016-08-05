@@ -2,4 +2,7 @@ apply plugin: 'java'
 apply plugin: 'application'
 
 sourceCompatibility = 1.8
+group = 'lambda-calculator'
+version = 0.1
+defaultTasks 'installDist'
 mainClassName = 'io.github.scyptnex.lcalc.Main'

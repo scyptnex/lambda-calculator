@@ -1,11 +1,5 @@
 package io.github.scyptnex.lcalc;
 
-/**
- * Main
- * <p>
- * Author: nic
- * Date: 4/08/16
- */
 public class Main {
 
     public static void main(String[] args){
