@@ -9,4 +9,12 @@ public class Fun implements Term{
     public String toDisplayString() {
         return String.format("(\\%s.%s)", head.toDisplayString(), body.toDisplayString());
     }
+
+    public Var getHead() {
+        return head;
+    }
+
+    public Term getBody() {
+        return body;
+    }
 }

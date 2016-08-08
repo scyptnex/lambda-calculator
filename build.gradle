@@ -1,8 +1,34 @@
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'antlr'
 
 sourceCompatibility = 1.8
 group = 'lambda-calculator'
 version = 0.1
 defaultTasks 'installDist'
 mainClassName = 'io.github.scyptnex.lcalc.Main'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    antlr 'org.antlr:antlr4:4.5' // use ANTLR version 4
+}
+
+// I want to see the tests that run
+test {
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+// Set the generator path for the antlr grammar
+generateGrammarSource {
+    arguments += ["-visitor", "-package", "io.github.scyptnex.lcalc.parser"];
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.8'; // A bug in the antlr plugin was fixed in 2.7
+}

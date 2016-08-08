@@ -9,4 +9,12 @@ public class App implements Term{
     public String toDisplayString() {
         return String.format("(%s %s)", lhs.toDisplayString(), rhs.toDisplayString());
     }
+
+    public Term getLhs() {
+        return lhs;
+    }
+
+    public Term getRhs() {
+        return rhs;
+    }
 }
