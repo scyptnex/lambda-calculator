@@ -1,4 +1,4 @@
-grammar untyped;
+grammar Untyped;
 
 start
     : expr EOF              # nonempty

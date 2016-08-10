@@ -35,7 +35,28 @@ jacocoTestReport {
         csv.enabled true
         csv.destination "${buildDir}/jacoco.csv"
     }
+
+    doLast {
+        def check_process = new ProcessBuilder()
+                .command("python3", "${rootDir}/.travis/coverage_check.py",
+                "-x", "lcalc\\.Main\$",
+                "--class=100-100", "--method=90-95", "--line=80-85",
+                "${buildDir}/jacoco.csv")
+                .redirectErrorStream(true)
+                .start()
+        def msg=""
+        check_process.inputStream.eachLine {msg+="\n" + it}
+        check_process.inputStream.close()
+        if(check_process.waitFor() != 0) {
+            throw new GradleException('Code coverage failed:' + msg)
+        } else {
+            logger.lifecycle(' - coverage check passed')
+        }
+
+    }
+
 }
+check.dependsOn jacocoTestReport
 
 // Set the generator path for the antlr grammar
 generateGrammarSource {

@@ -8,7 +8,3 @@ before_install:
     - sudo apt-get -qq update
     - sudo apt-get install -y python3
 
-script:
-    - ./gradlew check
-    - ./gradlew jacocoTestReport
-    - python3 ./.travis/coverage_check.py -x "lcalc\.Main$" --class=100-100 --method=90-95 --line=80-85 ./build/jacoco.csv
