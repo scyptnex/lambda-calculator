@@ -5,9 +5,14 @@ public class App implements Term{
     private Term lhs;
     private Term rhs;
 
-    @Override
-    public String toDisplayString() {
-        return String.format("(%s %s)", lhs.toDisplayString(), rhs.toDisplayString());
+    //@Override
+    //public String toDisplayString() {
+    //    return String.format("(%s %s)", lhs.toDisplayString(), rhs.toDisplayString());
+    //}
+
+    public App(Term l, Term r){
+        this.lhs = l;
+        this.rhs = r;
     }
 
     public Term getLhs() {

@@ -27,7 +27,7 @@ public class TestVar {
     public void versionZeroIsNotDifferentFromVarName(){
         Var v = new Var("foo");
         v.setAlphaVersion(0);
-        assertThat(v.toDisplayString(), is("foo"));
+        assertThat(v.toString(), is("foo"));
     }
 
     @Test
@@ -36,7 +36,7 @@ public class TestVar {
         Set<String> nms = new HashSet<>();
         for(int i=0; i<10; i++){
             v.setAlphaVersion(i);
-            nms.add(v.toDisplayString());
+            nms.add(v.toString());
         }
         assertThat("All 10 strings must be distinct", nms.size(), is(10));
     }

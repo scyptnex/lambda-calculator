@@ -10,9 +10,13 @@ public class LambdaException extends Exception{
         this.source = src;
     }
 
-    public void log(){
-        //TODO this should actually print to my logger (when i implement it)
-        System.err.println(String.format("[%s] - %s", source.getSimpleName(), message));
+    @Override
+    public String getMessage() {
+        return String.format("[%s] - %s", source.getSimpleName(), message);
     }
 
+    @Override
+    public String toString() {
+        return getMessage();
+    }
 }

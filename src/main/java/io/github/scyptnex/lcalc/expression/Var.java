@@ -11,11 +11,11 @@ public class Var implements Term {
     }
 
     @Override
-    public String toDisplayString() {
+    public String toString() {
         return baseName + versionToString(alphaVersion);
     }
 
-    public static String versionToString(int v){
+    private static String versionToString(int v){
         switch(v){
             case 0 : return "";
             case 1 : return "'";
