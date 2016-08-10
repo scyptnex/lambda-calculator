@@ -1,6 +1,7 @@
-apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'antlr'
+apply plugin: 'jacoco'
+apply plugin: 'java'
 
 sourceCompatibility = 1.8
 group = 'lambda-calculator'
@@ -21,6 +22,18 @@ dependencies {
 test {
     testLogging {
         events "passed", "skipped", "failed"
+    }
+}
+
+// We use these test reports to fail builds with insifficieent coverage.
+// There is a way to configure coverage-failure from within gradle using:
+// https://github.com/springfox/springfox/blob/fb780ee1f14627b239fba95730a69900b9b2313a/gradle/coverage.gradle
+// My groovy is not good enough to rely on the jacoco-plugin not changing, so until they implement
+// fail-on-low-coverage in the jacoco plugin, i will defer it to a python script
+jacocoTestReport {
+    reports {
+        csv.enabled true
+        csv.destination "${buildDir}/jacoco.csv"
     }
 }
 
