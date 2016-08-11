@@ -20,7 +20,7 @@ public class TestVisitors {
         assertThat(bv.visit("", new App(new Var("x"), new Var("y"))), is(nullValue()));
     }
 
-    Visitor<Void, Term> echoVisitor = new Visitor<Void, Term>(){
+    public static final Visitor<Void, Term> echoVisitor = new Visitor<Void, Term>(){
         public Term visitApp(Void o, App t) {
             return t;
         }
@@ -57,22 +57,23 @@ public class TestVisitors {
         assertThat(pre.visitAll(null, expr).collect(Collectors.toList()), is(Arrays.asList(expr, l, r)));
     }
 
+    public static final  Visitor.Recursive<String> structureString = new Visitor.Recursive<String>() {
+        public String visitApp(String lhs, String rhs, App a) {
+            return String.format("(%s %s)", lhs, rhs);
+        }
+        public String visitFun(String head, String body, Fun f) {
+            return String.format("(\\%s.%s)", head, body);
+        }
+        public String visitVar(Var v) {
+            return v.getBaseName();
+        }
+    };
+
     @Test
     public void recursiveBaseCase(){
-        Visitor.Recursive<String> writer = new Visitor.Recursive<String>() {
-            public String visitApp(String lhs, String rhs, App a) {
-                return String.format("(%s %s)", lhs, rhs);
-            }
-            public String visitFun(String head, String body, Fun f) {
-                return String.format("(\\%s.%s)", head, body);
-            }
-            public String visitVar(Var v) {
-                return v.getBaseName();
-            }
-        };
-        assertThat(writer.visit(new Var("name")), is("name"));
-        assertThat(writer.visit(new Fun(new Var("a"), new Var("b"))), is("(\\a.b)"));
-        assertThat(writer.visit(new App(new Var("x"), new Var("y"))), is("(x y)"));
+        assertThat(structureString.visit(new Var("name")), is("name"));
+        assertThat(structureString.visit(new Fun(new Var("a"), new Var("b"))), is("(\\a.b)"));
+        assertThat(structureString.visit(new App(new Var("x"), new Var("y"))), is("(x y)"));
     }
 
 }
