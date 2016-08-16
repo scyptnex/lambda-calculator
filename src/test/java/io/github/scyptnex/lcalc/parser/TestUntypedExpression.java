@@ -11,6 +11,7 @@ import org.junit.Test;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class TestUntypedExpression {
 
@@ -71,6 +72,40 @@ public class TestUntypedExpression {
         assertThat(t, is(instanceOf(App.class)));
         assertThat(((App)t).getLhs(), is(instanceOf(Var.class)));
         assertThat(((App)t).getRhs(), is(instanceOf(Fun.class)));
+    }
+
+    @Test
+    public void newVariablesHaveVersionZero() throws Exception {
+        Var v = (Var)parse("x");
+        assertThat(v.getAlphaVersion(), is(0));
+    }
+
+    @Test
+    public void boundVariablesShareInstance() throws Exception {
+        Fun f = (Fun)parse("\\x.x");
+        Var h = f.getHead();
+        Var b = (Var)f.getBody();
+        assertTrue("not the same instance", h == b);
+    }
+
+    @Test
+    public void doublyBoundNameSharesLocalInstance() throws Exception {
+        Fun f = (Fun)parse("\\x.\\x.x");
+        Var h = f.getHead();
+        Fun b = (Fun)f.getBody();
+        Var bh = b.getHead();
+        Var bb = (Var)b.getBody();
+        assertTrue("the two heads should be different", h != bh);
+        assertTrue("the body differs from the outer head", bb != h);
+        assertTrue("the body matches the inner head", bb == bh);
+    }
+
+    @Test
+    public void doublyAppliedNamesDiffer() throws Exception {
+        App a = (App)parse("x x");
+        Var l = (Var)a.getLhs();
+        Var r = (Var)a.getRhs();
+        assertTrue("The left and right should be different", l != r);
     }
 
 }

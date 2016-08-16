@@ -1,13 +1,12 @@
 package io.github.scyptnex.lcalc.parser;
 
-import io.github.scyptnex.lcalc.expression.App;
-import io.github.scyptnex.lcalc.expression.Fun;
-import io.github.scyptnex.lcalc.expression.Term;
-import io.github.scyptnex.lcalc.expression.Var;
+import io.github.scyptnex.lcalc.expression.*;
 import io.github.scyptnex.lcalc.parser.gen.UntypedBaseVisitor;
 import io.github.scyptnex.lcalc.parser.gen.UntypedParser;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class TermBuilder extends UntypedBaseVisitor<Term> {
 
@@ -16,7 +15,27 @@ public class TermBuilder extends UntypedBaseVisitor<Term> {
     }
 
     public static Term build(UntypedParser.ExpressionContext expr){
-        return new TermBuilder().visit(expr);
+        return new Unifier().visit(new HashMap<>(), new TermBuilder().visit(expr));
+    }
+
+    private static class Unifier implements Visitor<Map<String, Var>, Term> {
+
+        @Override
+        public Term visitApp(Map<String, Var> stringVarMap, App t) {
+            Map<String, Var> dupl = new HashMap<>(stringVarMap);
+            return new App(this.visit(stringVarMap, t.getLhs()), this.visit(dupl, t.getRhs()));
+        }
+
+        @Override
+        public Term visitFun(Map<String, Var> stringVarMap, Fun t) {
+            stringVarMap.put(t.getHead().getBaseName(), t.getHead());
+            return new Fun(t.getHead(), this.visit(stringVarMap, t.getBody()));
+        }
+
+        @Override
+        public Term visitVar(Map<String, Var> stringVarMap, Var t) {
+            return stringVarMap.getOrDefault(t.getBaseName(), t);
+        }
     }
 
     @Override
