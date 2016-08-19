@@ -75,12 +75,6 @@ public class TestUntypedExpression {
     }
 
     @Test
-    public void newVariablesHaveVersionZero() throws Exception {
-        Var v = (Var)parse("x");
-        assertThat(v.getAlphaVersion(), is(0));
-    }
-
-    @Test
     public void boundVariablesShareInstance() throws Exception {
         Fun f = (Fun)parse("\\x.x");
         Var h = f.getHead();
