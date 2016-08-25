@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 
 public class TestUntypedExpression {
 
-    private Term parse(String s) throws Exception{
+    public static Term parse(String s) throws Exception{
         UntypedLexer lex = new UntypedLexer(new ANTLRInputStream(s));
         CommonTokenStream cts = new CommonTokenStream(lex);
         UntypedParser par = new UntypedParser(cts);
