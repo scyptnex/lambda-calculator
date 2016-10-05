@@ -52,4 +52,24 @@ public class Application {
         return new ScriptParser(this);
     }
 
+    /**
+     * Evaluate the lambda expression t, depending on how the evaluation is configured, this may cause
+     * log messages to be printed.
+     * @param t The input lambda expression to evaluate
+     * @return The simplest form of the input expression, which could be the fully-executed form (if execution
+     * terminates) or the shortest form (if execution does not terminate)
+     */
+    public Term evaluate(Term t){
+        return t;
+    }
+
+    /**
+     * Evaluate the lambda expression t, and store its result in the identifier id
+     * @param t the lambda expression to evaluate
+     * @param id the name of the variable to store this lambda in
+     */
+    public void evaluate(Term t, String id){
+        state.put(id, evaluate(t));
+    }
+
 }

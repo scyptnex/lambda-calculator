@@ -22,4 +22,9 @@ public class App implements Term{
     public Term getRhs() {
         return rhs;
     }
+
+    @Override
+    public <A, R> R visitMe(Visitor<A, R> vis, A arg) {
+        return vis.visitApp(arg, this);
+    }
 }

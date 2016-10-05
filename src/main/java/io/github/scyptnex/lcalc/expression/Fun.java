@@ -22,4 +22,9 @@ public class Fun implements Term{
     public Term getBody() {
         return body;
     }
+
+    @Override
+    public <A, R> R visitMe(Visitor<A, R> vis, A arg) {
+        return vis.visitFun(arg, this);
+    }
 }

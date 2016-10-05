@@ -52,13 +52,13 @@ public class ScriptParser extends UntypedBaseVisitor<Void>{
 
     @Override
     public Void visitDefinition(UntypedParser.DefinitionContext ctx) {
-        // TODO
+        app.evaluate(TermBuilder.build(ctx.expression()), ctx.ID().getText());
         return null;
     }
 
     @Override
     public Void visitOutput(UntypedParser.OutputContext ctx) {
-        // TODO
+        app.evaluate(TermBuilder.build(ctx.expression()));
         return null;
     }
 }

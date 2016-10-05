@@ -11,4 +11,9 @@ public class Var implements Term {
     public String getBaseName() {
         return baseName;
     }
+
+    @Override
+    public <A, R> R visitMe(Visitor<A, R> vis, A arg) {
+        return vis.visitVar(arg, this);
+    }
 }
