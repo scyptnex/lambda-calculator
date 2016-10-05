@@ -18,6 +18,16 @@ public class TestApplication {
     }
 
     @Test
+    public void stupidMandatoryCoverage() {
+        Application.Verbosity.values();
+        assertThat(Application.Verbosity.valueOf("SILENT"   ), is(Application.Verbosity.SILENT));
+        assertThat(Application.Verbosity.valueOf("QUIET"    ), is(Application.Verbosity.QUIET));
+        assertThat(Application.Verbosity.valueOf("NORMAL"   ), is(Application.Verbosity.NORMAL));
+        assertThat(Application.Verbosity.valueOf("LOUD"     ), is(Application.Verbosity.LOUD));
+        assertThat(Application.Verbosity.valueOf("DEAFENING"), is(Application.Verbosity.DEAFENING));
+    }
+
+    @Test
     public void verbositySetsCorrectly() throws IOException {
         assertThat(withArgs("-qq").verb, is(Application.Verbosity.SILENT));
         assertThat(withArgs("-q").verb , is(Application.Verbosity.QUIET));
