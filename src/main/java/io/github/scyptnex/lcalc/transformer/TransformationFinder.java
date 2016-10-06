@@ -43,6 +43,7 @@ public class TransformationFinder {
             // first, is this application valid
             // TODO bail out when there are name conflicts
             if(t.getLhs() instanceof Fun){
+
                 return Optional.of(TransformationEvent.makeBeta(base, (Fun)t.getLhs(), t.getRhs()));
             }
             Optional<TransformationEvent> left = visit(null, t.getLhs());

@@ -80,23 +80,4 @@ public interface Visitor<A, R> {
             return null;
         }
     }
-
-    interface Recursive<R>{
-
-        R visitApp(R lhs, R rhs, App a);
-
-        R visitFun(R head, R body, Fun f);
-
-        R visitVar(Var v);
-
-        default R visit(Term t){
-            if (t instanceof App){
-                return visitApp(visit(((App) t).getLhs()), visit(((App) t).getRhs()), (App)t);
-            } else if (t instanceof Fun) {
-                return visitFun(visit(((Fun) t).getHead()), visit(((Fun) t).getBody()), (Fun)t);
-            } else {
-                return visitVar((Var) t);
-            }
-        }
-    }
 }

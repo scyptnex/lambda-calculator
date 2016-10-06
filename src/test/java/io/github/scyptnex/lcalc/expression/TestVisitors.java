@@ -57,23 +57,4 @@ public class TestVisitors {
         assertThat(pre.visitAll(null, expr).collect(Collectors.toList()), is(Arrays.asList(expr, l, r)));
     }
 
-    public static final  Visitor.Recursive<String> structureString = new Visitor.Recursive<String>() {
-        public String visitApp(String lhs, String rhs, App a) {
-            return String.format("(%s %s)", lhs, rhs);
-        }
-        public String visitFun(String head, String body, Fun f) {
-            return String.format("(\\%s.%s)", head, body);
-        }
-        public String visitVar(Var v) {
-            return v.getBaseName();
-        }
-    };
-
-    @Test
-    public void recursiveBaseCase(){
-        assertThat(structureString.visit(new Var("name")), is("name"));
-        assertThat(structureString.visit(new Fun(new Var("a"), new Var("b"))), is("(\\a.b)"));
-        assertThat(structureString.visit(new App(new Var("x"), new Var("y"))), is("(x y)"));
-    }
-
 }
