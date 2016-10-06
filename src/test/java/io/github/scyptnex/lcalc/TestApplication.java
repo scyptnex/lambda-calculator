@@ -19,7 +19,7 @@ public class TestApplication {
 
     @Test
     public void stupidMandatoryCoverage() {
-        Application.Verbosity.values();
+        assertThat(Application.Verbosity.values().length, is(5));
         assertThat(Application.Verbosity.valueOf("SILENT"   ), is(Application.Verbosity.SILENT));
         assertThat(Application.Verbosity.valueOf("QUIET"    ), is(Application.Verbosity.QUIET));
         assertThat(Application.Verbosity.valueOf("NORMAL"   ), is(Application.Verbosity.NORMAL));

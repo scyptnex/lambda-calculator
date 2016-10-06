@@ -1,5 +1,6 @@
 package io.github.scyptnex.lcalc.transformer;
 
+import io.github.scyptnex.lcalc.expression.Fun;
 import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
 
@@ -28,6 +29,10 @@ public class TransformationEvent {
 
     public static TransformationEvent makeAlpha(Term total, Var from, Term to){
         return new TransformationEvent(total, from, TransformType.ALPHA, to);
+    }
+
+    public static TransformationEvent makeBeta(Term total, Fun abstraction, Term applied){
+        return new TransformationEvent(total, abstraction, TransformType.BETA, applied);
     }
 
 }

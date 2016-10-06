@@ -27,10 +27,44 @@ public class TransformationFinder {
     }
 
     private Optional<TransformationEvent> result(){
-        return new VarSubstitutor().visit(Collections.emptySet(), base);
+        Optional<TransformationEvent> ret = Optional.empty();
+        if(!ret.isPresent()) ret = new FunctionApplier().visit(null, base);
+        if(!ret.isPresent()) ret = new VarSubstitutor().visit(Collections.emptySet(), base);
+        return ret;
     }
 
-    public class VarSubstitutor implements Visitor<Set<String>, Optional<TransformationEvent>>{
+    /**
+     * For performing beta substitution when the lhs of an application is a lambda
+     */
+    private class FunctionApplier implements Visitor<Void, Optional<TransformationEvent>>{
+
+        @Override
+        public Optional<TransformationEvent> visitApp(Void aVoid, App t) {
+            // first, is this application valid
+            // TODO bail out when there are name conflicts
+            if(t.getLhs() instanceof Fun){
+                return Optional.of(TransformationEvent.makeBeta(base, (Fun)t.getLhs(), t.getRhs()));
+            }
+            Optional<TransformationEvent> left = visit(null, t.getLhs());
+            if(left.isPresent()) return left;
+            else return visit(null, t.getRhs());
+        }
+
+        @Override
+        public Optional<TransformationEvent> visitFun(Void aVoid, Fun t) {
+            return visit(null, t.getBody());
+        }
+
+        @Override
+        public Optional<TransformationEvent> visitVar(Void aVoid, Var t) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * For performing alpha substitution when an identifier is defined in the map of variables
+     */
+    private class VarSubstitutor implements Visitor<Set<String>, Optional<TransformationEvent>>{
 
         @Override
         public Optional<TransformationEvent> visitApp(Set<String> avoid, App t) {

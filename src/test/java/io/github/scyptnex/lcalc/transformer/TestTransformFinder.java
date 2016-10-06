@@ -34,8 +34,18 @@ public class TestTransformFinder {
     public void applyToDefinitionTriggersAlpha() throws Exception {
         Optional<TransformationEvent> ev = find("a b", "a", "\\x.x");
         assertThat(ev, is(not(Optional.empty())));
-        assertThat(ev.map(te -> te.type).orElse(null), is(TransformationEvent.TransformType.ALPHA));
+        TransformationEvent tev = ev.get();
+        assertThat(tev.type, is(TransformationEvent.TransformType.ALPHA));
         // TODO make sure it actually alphas the right thing
+    }
+
+    @Test
+    public void applyTriggersBeta() throws Exception {
+        Optional<TransformationEvent> ev = find("(\\f.f) x");
+        assertThat(ev, is(not(Optional.empty())));
+        TransformationEvent tev = ev.get();
+        assertThat(tev.type, is(TransformationEvent.TransformType.BETA));
+        // TODO make sure it actually betas the right thing
     }
 
 }
