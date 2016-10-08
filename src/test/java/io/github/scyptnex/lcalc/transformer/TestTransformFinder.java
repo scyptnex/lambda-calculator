@@ -36,7 +36,6 @@ public class TestTransformFinder {
         assertThat(ev, is(not(Optional.empty())));
         TransformationEvent tev = ev.get();
         assertThat(tev.type, is(TransformationEvent.TransformType.ALPHA));
-        // TODO make sure it actually alphas the right thing
     }
 
     @Test
@@ -46,6 +45,35 @@ public class TestTransformFinder {
         TransformationEvent tev = ev.get();
         assertThat(tev.type, is(TransformationEvent.TransformType.BETA));
         // TODO make sure it actually betas the right thing
+    }
+
+    @Test
+    public void applyWithNameConflictTriggersAlpha() throws Exception {
+        Optional<TransformationEvent> ev = find("(\\f a.f a) (\\a.a)");
+        assertThat(ev, is(not(Optional.empty())));
+        TransformationEvent tev = ev.get();
+        assertThat(tev.type, is(TransformationEvent.TransformType.ALPHA));
+        assertThat(((Var)tev.relevantSubTerm).getBaseName(), is("a"));
+    }
+
+    @Test
+    public void alphaSimplifiesName() throws Exception {
+        Optional<TransformationEvent> ev = find("(\\f a'.f a') (\\a'.a')");
+        assertThat(ev, is(not(Optional.empty())));
+        TransformationEvent tev = ev.get();
+        assertThat(tev.type, is(TransformationEvent.TransformType.ALPHA));
+        assertThat(((Var)tev.relevantSubTerm).getBaseName(), is("a'"));
+        assertThat(((Var)tev.transformation).getBaseName(), is("a"));
+    }
+
+    @Test
+    public void alphaFindsLowestNameAvailable() throws Exception {
+        Optional<TransformationEvent> ev = find("(\\f a'.f a a' a'2 a'3) (\\a'.a')");
+        assertThat(ev, is(not(Optional.empty())));
+        TransformationEvent tev = ev.get();
+        assertThat(tev.type, is(TransformationEvent.TransformType.ALPHA));
+        assertThat(((Var)tev.relevantSubTerm).getBaseName(), is("a'"));
+        assertThat(((Var)tev.transformation).getBaseName(), is("a'1"));
     }
 
 }

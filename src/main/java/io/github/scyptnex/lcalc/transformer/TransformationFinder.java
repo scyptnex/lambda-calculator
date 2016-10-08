@@ -1,6 +1,7 @@
 package io.github.scyptnex.lcalc.transformer;
 
 import io.github.scyptnex.lcalc.expression.*;
+import io.github.scyptnex.lcalc.util.Bi;
 
 import java.util.Collections;
 import java.util.Map;
@@ -43,8 +44,20 @@ public class TransformationFinder {
             // first, is this application valid
             // TODO bail out when there are name conflicts
             if(t.getLhs() instanceof Fun){
-
-                return Optional.of(TransformationEvent.makeBeta(base, (Fun)t.getLhs(), t.getRhs()));
+                Fun lhs = (Fun) t.getLhs();
+                Util.BoundFree rbf = Util.getBoundFree(t.getRhs()), lbf = Util.getBoundFree(lhs.getBody());
+                // i'm conservatively renaming anything that could conflict
+                Set<String> namesInBody = Stream.concat(lbf.bound.stream(), lbf.free.stream())
+                        .filter(v -> !v.equals(lhs.getHead())) // conflicts with the binding var (itself) don't matter
+                        .map(Var::getBaseName)
+                        .collect(Collectors.toSet());
+                // at this point we know the optional exists
+                return Optional.of(Stream.concat(rbf.bound.stream(), rbf.free.stream())
+                        .map(v -> new Bi<>(v, v.getBaseName()))
+                        .filter(b -> namesInBody.contains(b.second))
+                        .findAny() // if there is any name conflict
+                        .map(n -> chooseAlpha(n.first, namesInBody, rbf)) // map it to an alpha transform and return
+                        .orElseGet(() -> TransformationEvent.makeBeta(base, (Fun)t.getLhs(), t.getRhs())));
             }
             Optional<TransformationEvent> left = visit(null, t.getLhs());
             if(left.isPresent()) return left;
@@ -59,6 +72,36 @@ public class TransformationFinder {
         @Override
         public Optional<TransformationEvent> visitVar(Void aVoid, Var t) {
             return Optional.empty();
+        }
+    }
+
+    /**
+     * @param conflict the conflicting variable
+     * @param taken the set of taken names (i.e. bound names in the body, excluding the binding name
+     * @param renamableTermVars the boundfree of the renaming set, so i don't have to find it again
+     * @return an Alpha transform event
+     */
+    private TransformationEvent chooseAlpha(Var conflict, Set<String> taken, Util.BoundFree renamableTermVars){
+        // you also cant conflict with your own names
+        taken = Stream.concat(taken.stream(),
+                    Stream.concat(
+                        renamableTermVars.bound.stream(),
+                        renamableTermVars.free.stream())
+                        .map(Var::getBaseName))
+                .collect(Collectors.toSet());
+
+        //remove any suffix from the name
+        String newName = conflict.getBaseName();
+        if(newName.contains("'")){
+            newName = newName.substring(0, newName.indexOf("'"));
+        }
+
+        //find the lowest name that does not currently exist
+        for(int i=0; ; i++){
+            String sfx = i>0 ? (i>1 ? "'" + (i-1) : "'") : "";
+            if(!taken.contains(newName + sfx)){
+                return TransformationEvent.makeAlpha(base, conflict, new Var(newName + sfx));
+            }
         }
     }
 

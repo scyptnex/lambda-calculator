@@ -33,6 +33,24 @@ public class TestUntypedExpression {
     }
 
     @Test
+    public void varContainsUnderscore() throws Exception {
+        Term t = parse("a_");
+        assertThat(t, is(instanceOf(Var.class)));
+    }
+
+    @Test
+    public void varContainsHyphen() throws Exception {
+        Term t = parse("a-");
+        assertThat(t, is(instanceOf(Var.class)));
+    }
+
+    @Test
+    public void varContainsPrime() throws Exception {
+        Term t = parse("a'");
+        assertThat(t, is(instanceOf(Var.class)));
+    }
+
+    @Test
     public void parsesFun() throws Exception {
         Term t = parse("\\x.x");
         assertThat(t, is(instanceOf(Fun.class)));
