@@ -6,10 +6,33 @@ import java.util.Set;
 /**
  * Utilities for expressions
  */
-public class Util {
+public class Util implements Visitor<Void, String>{
+
+    private static final String LAMBDA = "\u03BB";
+
+    private Util() {} // prevent public construction
 
     public static BoundFree getBoundFree(Term t){
         return new BoundFree(t);
+    }
+
+    public static String prettyPrint(Term t){
+        return new Util().visit(null, t);
+    }
+
+    @Override
+    public String visitApp(Void aVoid, App t) {
+        return "(" + visit(null, t.getLhs()) + " " + visit(null, t.getRhs()) + ")";
+    }
+
+    @Override
+    public String visitFun(Void aVoid, Fun t) {
+        return "(" + LAMBDA + " " + visit(null, t.getHead()) + "." + visit(null, t.getBody()) + ")";
+    }
+
+    @Override
+    public String visitVar(Void aVoid, Var t) {
+        return t.getBaseName();
     }
 
     public static class BoundFree implements Visitor<Void, Void>{

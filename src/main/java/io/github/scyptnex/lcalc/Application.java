@@ -1,15 +1,17 @@
 package io.github.scyptnex.lcalc;
 
 import io.github.scyptnex.lcalc.expression.Term;
+import io.github.scyptnex.lcalc.expression.Util;
 import io.github.scyptnex.lcalc.parser.ScriptParser;
+import io.github.scyptnex.lcalc.transformer.TransformationEvent;
+import io.github.scyptnex.lcalc.transformer.TransformationFinder;
+import io.github.scyptnex.lcalc.transformer.Transformer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Application
@@ -18,6 +20,8 @@ import java.util.Scanner;
  */
 public class Application {
 
+    public static final int MAXIMUM_ITERS = 500; // TODO make this a resources flag
+
     public enum Verbosity{
         SILENT,QUIET,NORMAL,LOUD,DEAFENING;
     }
@@ -25,6 +29,7 @@ public class Application {
     public boolean interpreting = true;
     public Verbosity verb = Verbosity.NORMAL;
     public Map<String, Term> state = new HashMap<>();
+    private Scanner inStream = null;
 
     public void acceptArguments(String[] args) throws IOException{
         for(String a : args){
@@ -40,10 +45,9 @@ public class Application {
     }
 
     public void interpret(InputStream in) throws IOException{
-        Scanner sca = new Scanner(in);
-        while(sca.hasNextLine()){
-            String line = sca.nextLine();
-            System.err.println(line);
+        inStream = new Scanner(in);
+        while(inStream.hasNextLine()){
+            String line = inStream.nextLine();
             getScriptParser().parse(line);
         }
     }
@@ -60,6 +64,34 @@ public class Application {
      * terminates) or the shortest form (if execution does not terminate)
      */
     public Term evaluate(Term t){
+        Term original = t;
+        List<TransformationEvent> transfs = new ArrayList<>();
+        Optional<TransformationEvent> cur = TransformationFinder.find(t, state);
+        int count = 0;
+        while(cur.isPresent()){
+            transfs.add(cur.get());
+            t = new Transformer().apply(cur.get());
+            count++;
+            if(count >= MAXIMUM_ITERS){
+                t = original;
+                break;
+                //System.out.println("Maximum iterations reached, keep going? [y/N]");
+                //String response = inStream.nextLine().toLowerCase();
+                //if(!response.contains("y")){
+                //    break;
+                //}
+            }
+            cur = TransformationFinder.find(t, state);
+        }
+        if(t != original){
+            for (TransformationEvent tev : transfs){
+                System.out.println("-- " + tev.type.name() + " --");
+                System.out.println(Util.prettyPrint(tev.totalTerm));
+                System.out.println(Util.prettyPrint(tev.relevantSubTerm) + " -> " + Util.prettyPrint(tev.transformation));
+                System.out.println("--------");
+            }
+        }
+        System.out.println(Util.prettyPrint(t));
         return t;
     }
 

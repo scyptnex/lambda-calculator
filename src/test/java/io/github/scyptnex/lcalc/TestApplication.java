@@ -1,5 +1,10 @@
 package io.github.scyptnex.lcalc;
 
+import io.github.scyptnex.lcalc.expression.App;
+import io.github.scyptnex.lcalc.expression.Fun;
+import io.github.scyptnex.lcalc.expression.Term;
+import io.github.scyptnex.lcalc.expression.Var;
+import io.github.scyptnex.lcalc.parser.TestUntypedExpression;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -61,6 +66,20 @@ public class TestApplication {
     @Test
     public void interpretOutputIsValid() throws IOException {
         withArgs().interpret(new ByteArrayInputStream("? \\x.x".getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    public void evaluateReturnsSimplest() throws IOException {
+        Var id = new Var("x");
+        Var v = (Var)withArgs().evaluate(new App(new Fun(id, id), new Var("y")));
+        assertThat(v.getBaseName(), is("y"));
+    }
+
+    @Test
+    public void evaluateInfiniteReturnsOriginal() throws Exception {
+        Term ycomb = TestUntypedExpression.parse("\\f.(\\x.f (x x)) (\\x.f (x x))");
+        Term t = withArgs().evaluate(ycomb);
+        assertThat(t, is(ycomb));
     }
 
 }
