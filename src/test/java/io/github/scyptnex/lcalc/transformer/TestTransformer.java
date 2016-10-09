@@ -46,6 +46,20 @@ public class TestTransformer {
     }
 
     @Test
+    public void betaPreservesUnrelatedVars(){
+        Var important = new Var("important");
+        Var replaceMe = new Var("replaceMe");
+        Fun pseudoResult = new Fun(important, new App(replaceMe, important));
+        App t = new App(new Fun(replaceMe, pseudoResult), new Var("withMe"));
+        TransformationEvent tev = TransformationEvent.makeBeta(t, (Fun)t.getLhs(), t.getRhs());
+        Fun f = (Fun)new Transformer().apply(tev);
+        assertThat(f, is(not(pseudoResult)));
+        assertThat(f.getHead(), is(not(important)));
+        assertThat(f.getHead().getBaseName(), is(important.getBaseName()));
+        assertThat(((App)f.getBody()).getRhs(), is(f.getHead()));
+    }
+
+    @Test
     public void deltaDuplicatesAllTerms(){
         Var body = new Var("foo");
         Var def = new Var("bar");
