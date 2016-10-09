@@ -12,7 +12,7 @@ import io.github.scyptnex.lcalc.expression.Var;
 public class TransformationEvent {
 
     public enum TransformType{
-        ALPHA, BETA, ETA
+        ALPHA, BETA, ETA, DELTA
     }
 
     public final Term totalTerm;
@@ -27,12 +27,25 @@ public class TransformationEvent {
         this.transformation = trans;
     }
 
-    public static TransformationEvent makeAlpha(Term total, Var from, Term to){
+    /**
+     * For preventing name conflicts
+     */
+    public static TransformationEvent makeAlpha(Term total, Var from, Var to){
         return new TransformationEvent(total, from, TransformType.ALPHA, to);
     }
 
+    /**
+     * For calling abstractions
+     */
     public static TransformationEvent makeBeta(Term total, Fun abstraction, Term applied){
         return new TransformationEvent(total, abstraction, TransformType.BETA, applied);
+    }
+
+    /**
+     * For defined name substitutions
+     */
+    public static TransformationEvent makeDelta(Term total, Var name, Term def){
+        return new TransformationEvent(total, name, TransformType.DELTA, def);
     }
 
 }

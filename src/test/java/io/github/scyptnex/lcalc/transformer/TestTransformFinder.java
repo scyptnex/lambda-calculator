@@ -31,11 +31,17 @@ public class TestTransformFinder {
     }
 
     @Test
-    public void applyToDefinitionTriggersAlpha() throws Exception {
-        Optional<TransformationEvent> ev = find("a b", "a", "\\x.x");
+    public void applyToDefinitionTriggersDelta() throws Exception {
+        Optional<TransformationEvent> ev = find("\\ b . a b", "a", "\\x.x");
         assertThat(ev, is(not(Optional.empty())));
         TransformationEvent tev = ev.get();
-        assertThat(tev.type, is(TransformationEvent.TransformType.ALPHA));
+        assertThat(tev.type, is(TransformationEvent.TransformType.DELTA));
+    }
+
+    @Test
+    public void boundNamesAreNotDefinitions() throws Exception {
+        Optional<TransformationEvent> ev = find("\\ a . a b", "a", "\\x.x");
+        assertThat(ev, is(Optional.empty()));
     }
 
     @Test

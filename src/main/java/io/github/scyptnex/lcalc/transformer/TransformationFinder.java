@@ -20,17 +20,19 @@ public class TransformationFinder {
     }
 
     private final Term base;
+    private final Util.BoundFree bf;
     private final Map<String, Term> definitions;
 
     private TransformationFinder(Term base, Map<String, Term> definitions) {
         this.base = base;
+        this.bf = Util.getBoundFree(base);
         this.definitions = definitions;
     }
 
     private Optional<TransformationEvent> result(){
         Optional<TransformationEvent> ret = Optional.empty();
         if(!ret.isPresent()) ret = new FunctionApplier().visit(null, base);
-        if(!ret.isPresent()) ret = new VarSubstitutor().visit(Collections.emptySet(), base);
+        if(!ret.isPresent()) ret = new VarSubstitutor().visit(null, base);
         return ret;
     }
 
@@ -42,7 +44,6 @@ public class TransformationFinder {
         @Override
         public Optional<TransformationEvent> visitApp(Void aVoid, App t) {
             // first, is this application valid
-            // TODO bail out when there are name conflicts
             if(t.getLhs() instanceof Fun){
                 Fun lhs = (Fun) t.getLhs();
                 Util.BoundFree rbf = Util.getBoundFree(t.getRhs()), lbf = Util.getBoundFree(lhs.getBody());
@@ -90,7 +91,7 @@ public class TransformationFinder {
                         .map(Var::getBaseName))
                 .collect(Collectors.toSet());
 
-        //remove any suffix from the name
+        // remove any suffix from the name
         String newName = conflict.getBaseName();
         if(newName.contains("'")){
             newName = newName.substring(0, newName.indexOf("'"));
@@ -106,31 +107,30 @@ public class TransformationFinder {
     }
 
     /**
-     * For performing alpha substitution when an identifier is defined in the map of variables
+     * For performing delta substitution when an identifier is defined in the map of variables
      */
-    private class VarSubstitutor implements Visitor<Set<String>, Optional<TransformationEvent>>{
+    private class VarSubstitutor implements Visitor<Void, Optional<TransformationEvent>>{
 
         @Override
-        public Optional<TransformationEvent> visitApp(Set<String> avoid, App t) {
+        public Optional<TransformationEvent> visitApp(Void v, App t) {
             if(t.getLhs() instanceof Var){
                 String nm = ((Var) t.getLhs()).getBaseName();
-                if(definitions.containsKey(nm)){
-                    return Optional.of(TransformationEvent.makeAlpha(base, (Var)t.getLhs(), definitions.get(nm)));
+                if(definitions.containsKey(nm) && bf.free.contains(t.getLhs())){
+                    return Optional.of(TransformationEvent.makeDelta(base, (Var)t.getLhs(), definitions.get(nm)));
                 }
             }
-            Optional<TransformationEvent> left = visit(avoid, t.getLhs());
+            Optional<TransformationEvent> left = visit(null, t.getLhs());
             if(left.isPresent()) return left;
-            return visit(avoid, t.getRhs());
+            return visit(null, t.getRhs());
         }
 
         @Override
-        public Optional<TransformationEvent> visitFun(Set<String> avoid, Fun t) {
-            // a variable bound locally to a function can be name-swapped for one defined elsewhere (i.e. only free vars can)
-            return visit(Stream.concat(avoid.stream(), Stream.of(t.getHead().getBaseName())).collect(Collectors.toSet()), t.getBody());
+        public Optional<TransformationEvent> visitFun(Void v, Fun t) {
+            return visit(null, t.getBody());
         }
 
         @Override
-        public Optional<TransformationEvent> visitVar(Set<String> avoid, Var t) {
+        public Optional<TransformationEvent> visitVar(Void v, Var t) {
             return Optional.empty();
         }
     }
