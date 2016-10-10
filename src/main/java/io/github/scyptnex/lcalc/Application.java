@@ -9,6 +9,7 @@ import io.github.scyptnex.lcalc.transformer.Transformer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -33,7 +34,12 @@ public class Application {
 
     public void acceptArguments(String[] args) throws IOException{
         for(String a : args){
-            if(a.equals("-qq")) verb = Verbosity.SILENT;
+            if(a.equals("-h")){
+                usage(System.out);
+                interpreting = false;
+                return;
+            }
+            else if(a.equals("-qq")) verb = Verbosity.SILENT;
             else if(a.equals("-q")) verb = Verbosity.QUIET;
             else if(a.equals("-v")) verb = Verbosity.LOUD;
             else if(a.equals("-vv")) verb = Verbosity.DEAFENING;
@@ -42,6 +48,19 @@ public class Application {
                 getScriptParser().parse(Paths.get(a));
             }
         }
+    }
+
+    public static void usage(PrintStream out){
+        out.println("Lambda Calculator");
+        out.println();
+        out.println("Usage: lambda-calculator [OPTIONS] [FILES]");
+        out.println("    Executes the lambda calculus commands in each of the files in sequence.  If no files are given, will execute an interactive interpreter.");
+        out.println();
+        out.println("Options:");
+        out.println("    -qq      Execute silently, output only when demanded");
+        out.println("    -q       Execute quietly, showing all results");
+        out.println("    -v       Execute loudly, showing all intermediate steps");
+        out.println("    -vv      Execute verbosely, showing all intermediate steps in detail");
     }
 
     public void interpret(InputStream in) throws IOException{

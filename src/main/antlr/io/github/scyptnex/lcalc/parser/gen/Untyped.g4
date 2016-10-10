@@ -28,3 +28,4 @@ var
 
 ID  :   [a-zA-Z0-9_\-']+ ; // identifiers
 WS  :   [ \t\n\r]+ -> skip ; // toss out whitespace
+COM :   '//' ~[\r\n]* -> skip ; // toss out line comments

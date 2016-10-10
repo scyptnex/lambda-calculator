@@ -54,6 +54,16 @@ public class TestApplication {
     }
 
     @Test
+    public void helpDisablesInterpretation() throws IOException {
+        assertThat(withArgs("-h").interpreting, is(false));
+    }
+
+    @Test
+    public void helpPreventsFilesFromReading() throws IOException {
+        assertThat(withArgs("-h", "nonexistantfile").interpreting, is(false));
+    }
+
+    @Test
     public void interpretNothingIsValid() throws IOException {
         withArgs().interpret(new ByteArrayInputStream(new byte[]{}));
     }

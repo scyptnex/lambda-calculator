@@ -120,4 +120,21 @@ public class TestUntypedExpression {
         assertTrue("The left and right should be different", l != r);
     }
 
+    @Test
+    public void ignoresWhitespace() throws Exception {
+        App a = (App)parse("l \n \t r");
+        Var l = (Var)a.getLhs();
+        Var r = (Var)a.getRhs();
+        assertThat(l.getBaseName(), is("l"));
+        assertThat(r.getBaseName(), is("r"));
+    }
+
+    @Test
+    public void ignoresComments() throws Exception {
+        App a = (App)parse("l // this is a comment\n r");
+        Var l = (Var)a.getLhs();
+        Var r = (Var)a.getRhs();
+        assertThat(l.getBaseName(), is("l"));
+        assertThat(r.getBaseName(), is("r"));
+    }
 }

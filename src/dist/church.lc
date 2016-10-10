@@ -1,0 +1,8 @@
+// Booleans
+# TRUE  \x y . x
+# NOT   \f x y . f y x
+# FALSE NOT TRUE
+
+// Numerics
+# ZERO FALSE
+
