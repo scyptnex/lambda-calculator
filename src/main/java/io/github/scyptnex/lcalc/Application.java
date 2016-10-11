@@ -2,6 +2,8 @@ package io.github.scyptnex.lcalc;
 
 import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Util;
+import io.github.scyptnex.lcalc.output.LambdaPrinter;
+import io.github.scyptnex.lcalc.output.TextPrinter;
 import io.github.scyptnex.lcalc.parser.ScriptParser;
 import io.github.scyptnex.lcalc.transformer.TransformationEvent;
 import io.github.scyptnex.lcalc.transformer.TransformationFinder;
@@ -102,15 +104,14 @@ public class Application {
             }
             cur = TransformationFinder.find(t, state);
         }
-        if(t != original){
-            for (TransformationEvent tev : transfs){
-                System.out.println("-- " + tev.type.name() + " --");
-                System.out.println(Util.prettyPrint(tev.totalTerm));
-                System.out.println(Util.prettyPrint(tev.relevantSubTerm) + " -> " + Util.prettyPrint(tev.transformation));
-                System.out.println("--------");
+        LambdaPrinter lp = TextPrinter.unicode(System.out);
+        if(t != original && (verb == Verbosity.LOUD || verb == Verbosity.DEAFENING)){
+            for(int i=0; i<transfs.size(); i++){
+                Term nxt = i+1 < transfs.size() ? transfs.get(i+1).totalTerm : t;
+                lp.decode(transfs.get(i), nxt, verb == Verbosity.DEAFENING);
             }
         }
-        System.out.println(Util.prettyPrint(t));
+        lp.printLambda(t);
         return t;
     }
 
