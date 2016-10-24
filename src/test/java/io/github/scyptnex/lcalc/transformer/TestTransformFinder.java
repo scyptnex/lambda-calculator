@@ -2,6 +2,7 @@ package io.github.scyptnex.lcalc.transformer;
 
 import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
+import io.github.scyptnex.lcalc.output.TextPrinter;
 import io.github.scyptnex.lcalc.parser.TestUntypedExpression;
 import org.junit.Test;
 
@@ -55,11 +56,19 @@ public class TestTransformFinder {
 
     @Test
     public void applyWithNameConflictTriggersAlpha() throws Exception {
-        Optional<TransformationEvent> ev = find("(\\f a.f a) (\\a.a)");
+        Optional<TransformationEvent> ev = find("(\\f a.f a) a");
         assertThat(ev, is(not(Optional.empty())));
         TransformationEvent tev = ev.get();
         assertThat(tev.type, is(TransformationEvent.TransformType.ALPHA));
         assertThat(((Var)tev.relevantSubTerm).getBaseName(), is("a"));
+    }
+
+    @Test
+    public void alphaNeverRenamesDefs() throws Exception {
+        Optional<TransformationEvent> ev = find("(\\f a.f a I) I", "I", "\\x.x");
+        assertThat(ev, is(not(Optional.empty())));
+        TransformationEvent tev = ev.get();
+        assertThat(tev.type, is(not(TransformationEvent.TransformType.ALPHA)));
     }
 
     @Test

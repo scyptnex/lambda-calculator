@@ -41,6 +41,7 @@ public class Application {
                 interpreting = false;
                 return;
             }
+            else if(a.equals("-i")) interpreting = true;
             else if(a.equals("-qq")) verb = Verbosity.SILENT;
             else if(a.equals("-q")) verb = Verbosity.QUIET;
             else if(a.equals("-v")) verb = Verbosity.LOUD;

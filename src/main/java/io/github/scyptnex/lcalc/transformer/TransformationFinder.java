@@ -56,7 +56,8 @@ public class TransformationFinder {
                 return Optional.of(Stream.concat(rbf.bound.stream(), rbf.free.stream())
                         .map(v -> new Bi<>(v, v.getBaseName()))
                         .filter(b -> namesInBody.contains(b.second))
-                        .findAny() // if there is any name conflict
+                        .findAny()                                        // if there is any name conflict
+                        .filter(n -> !definitions.containsKey(n.second))  // which is not for a definition
                         .map(n -> chooseAlpha(n.first, namesInBody, rbf)) // map it to an alpha transform and return
                         .orElseGet(() -> TransformationEvent.makeBeta(base, (Fun)t.getLhs(), t.getRhs())));
             }
