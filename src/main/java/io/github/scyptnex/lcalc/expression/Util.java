@@ -6,9 +6,7 @@ import java.util.Set;
 /**
  * Utilities for expressions
  */
-public class Util implements Visitor<Void, String>{
-
-    private static final String LAMBDA = "\u03BB";
+public class Util implements Visitor<String, String>{
 
     private Util() {} // prevent public construction
 
@@ -16,22 +14,22 @@ public class Util implements Visitor<Void, String>{
         return new BoundFree(t);
     }
 
-    public static String prettyPrint(Term t){
-        return new Util().visit(null, t);
+    public static String prettyPrint(String ld, Term t){
+        return new Util().visit(ld, t);
     }
 
     @Override
-    public String visitApp(Void aVoid, App t) {
-        return "(" + visit(null, t.getLhs()) + " " + visit(null, t.getRhs()) + ")";
+    public String visitApp(String ld, App t) {
+        return "(" + visit(ld, t.getLhs()) + " " + visit(ld, t.getRhs()) + ")";
     }
 
     @Override
-    public String visitFun(Void aVoid, Fun t) {
-        return "(" + LAMBDA + " " + visit(null, t.getHead()) + "." + visit(null, t.getBody()) + ")";
+    public String visitFun(String ld, Fun t) {
+        return "(" + ld + " " + visit(ld, t.getHead()) + "." + visit(ld, t.getBody()) + ")";
     }
 
     @Override
-    public String visitVar(Void aVoid, Var t) {
+    public String visitVar(String ld, Var t) {
         return t.getBaseName();
     }
 

@@ -17,25 +17,6 @@ public class TestUtil {
     }
 
     @Test
-    public void prettyPrintVar(){
-        Var v = new Var("x");
-        assertThat(Util.prettyPrint(v), is("x"));
-    }
-
-    @Test
-    public void prettyPrintFun(){
-        Var v = new Var("x");
-        Fun f = new Fun(v, v);
-        assertThat(Util.prettyPrint(f), is("(λ x.x)"));
-    }
-
-    @Test
-    public void prettyPrintApp(){
-        App a = new App(new Var("x"), new Var("y"));
-        assertThat(Util.prettyPrint(a), is("(x y)"));
-    }
-
-    @Test
     public void singleVarIsFree() {
         Term t = new Var("foo");
         Util.BoundFree bf = Util.getBoundFree(t);

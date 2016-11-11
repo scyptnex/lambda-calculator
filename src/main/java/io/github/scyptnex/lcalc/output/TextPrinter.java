@@ -23,6 +23,10 @@ public class TextPrinter extends LambdaPrinter {
         return new TextPrinter(out, "\u03BB");
     }
 
+    public static TextPrinter ascii(PrintStream out){
+        return new TextPrinter(out, "\\");
+    }
+
     @Override
     public void detailAlpha(Term input, Var rename, Term output) {
         out.println("- ALPHA -");
@@ -49,6 +53,6 @@ public class TextPrinter extends LambdaPrinter {
 
     @Override
     public String makePrettyString(Term t) {
-        return Util.prettyPrint(t);
+        return Util.prettyPrint(lambda, t);
     }
 }

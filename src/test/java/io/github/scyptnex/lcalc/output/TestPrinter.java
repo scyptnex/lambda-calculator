@@ -6,24 +6,40 @@ import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
 import io.github.scyptnex.lcalc.transformer.TransformationEvent;
 import io.github.scyptnex.lcalc.util.Bi;
-import org.hamcrest.Matcher;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(Parameterized.class)
 public class TestPrinter {
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> versions(){
+        return Arrays.asList(
+                new Object[]{0},
+                new Object[]{1}
+        );
+    }
+
+    @Parameterized.Parameter
+    public Integer style;
 
     private Bi<ByteArrayOutputStream, LambdaPrinter> makePrinter(){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        return new Bi<>(baos, TextPrinter.unicode(new PrintStream(baos)));
+        switch(style){
+            case 0  : return new Bi<>(baos, TextPrinter.unicode(new PrintStream(baos)));
+            default : return new Bi<>(baos, TextPrinter.ascii(new PrintStream(baos)));
+        }
     }
 
     private String getPrinted(Bi<ByteArrayOutputStream, LambdaPrinter> b){
