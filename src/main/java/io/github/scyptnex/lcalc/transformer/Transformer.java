@@ -82,6 +82,7 @@ public class Transformer implements Function<TransformationEvent, Term> {
         @Override
         public Term visitVar(Void nul, Var t) {
             if(replaceMe.map(t::equals).orElse(false)){
+                // TODO "? MULT THREE TWO" - this replaces all instances of the definition, but i'd like to lazily replace only the shallow ones
                 return alsoDuplicateReplacement ? new DuplicateReplace(varMap).visit(null, withMe) : withMe;
             } else {
                 if(!varMap.containsKey(t)){

@@ -1,16 +1,13 @@
 package io.github.scyptnex.lcalc.output;
 
-import io.github.scyptnex.lcalc.expression.Fun;
-import io.github.scyptnex.lcalc.expression.Term;
-import io.github.scyptnex.lcalc.expression.Util;
-import io.github.scyptnex.lcalc.expression.Var;
+import io.github.scyptnex.lcalc.expression.*;
 
 import java.io.PrintStream;
 
 /**
  * TextPrinter, for printing lambda characters inr eadable text (i.e. to the console)
  */
-public class TextPrinter extends LambdaPrinter {
+public class TextPrinter extends LambdaPrinter implements Visitor<Void, String>{
 
     private final String lambda;
 
@@ -53,6 +50,31 @@ public class TextPrinter extends LambdaPrinter {
 
     @Override
     public String makePrettyString(Term t) {
-        return Util.prettyPrint(lambda, t);
+        return this.visit(null, t);
+    }
+
+    @Override
+    public String visitApp(Void v, App t) {
+        String l = visit(null, t.getLhs());
+        if(t.getLhs() instanceof Fun) l = "(" + l + ")";
+        String r = visit(null, t.getRhs());
+        if(t.getRhs() instanceof App) r = "(" + r + ")";
+        return l + " " + r;
+    }
+
+    @Override
+    public String visitFun(Void v, Fun t) {
+        String bod = visit(null, t.getBody());
+        String hd = lambda + " " + visit(null, t.getHead());
+        if(bod.startsWith(lambda)){
+            return hd + bod.substring(lambda.length());
+        } else {
+            return hd + "." + bod;
+        }
+    }
+
+    @Override
+    public String visitVar(Void ld, Var t) {
+        return t.getBaseName();
     }
 }

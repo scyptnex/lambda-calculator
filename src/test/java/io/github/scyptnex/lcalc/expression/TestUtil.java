@@ -17,6 +17,11 @@ public class TestUtil {
     }
 
     @Test
+    public void mandatoryCoverageIsAQuestionablyUsefulIdeaIfItLeadsToTestsLikeThis() {
+        new Util();
+    }
+
+    @Test
     public void singleVarIsFree() {
         Term t = new Var("foo");
         Util.BoundFree bf = Util.getBoundFree(t);

@@ -2,7 +2,10 @@
 # TRUE     \x y . x
 # FALSE    \x y . y
 
-// LOGIC
+// Logic
 # NOT      \f x y . f y x
 # OR       \a b x y . a x (b x y)
 # AND      \a b x y . a (b x y) y
+
+// Control
+# IF       \t . t

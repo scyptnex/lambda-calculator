@@ -1,6 +1,7 @@
 package io.github.scyptnex.lcalc.transformer;
 
 import io.github.scyptnex.lcalc.expression.*;
+import io.github.scyptnex.lcalc.output.TextPrinter;
 import io.github.scyptnex.lcalc.util.Bi;
 
 import java.util.Collections;
@@ -50,7 +51,10 @@ public class TransformationFinder {
                 // i'm conservatively renaming anything that could conflict
                 Map<String, Var> namesInBody = Stream.concat(lbf.bound.stream(), lbf.free.stream())
                         .filter(v -> !v.equals(lhs.getHead())) // conflicts with the binding var (itself) don't matter
-                        .collect(Collectors.toMap(Var::getBaseName, v -> v));
+                        // duplicates matter, because they could be different bindings, but
+                        // only free vars can do this, so its safe to choose the second
+                        // because free vars come after bound
+                        .collect(Collectors.toMap(Var::getBaseName, v -> v, (v1, v2) -> v2));
                 return Optional.of(Stream.concat(rbf.bound.stream(), rbf.free.stream())
                         .map(v -> new Bi<>(v, v.getBaseName()))
                         .filter(b -> namesInBody.containsKey(b.second))            // For names also in the body
