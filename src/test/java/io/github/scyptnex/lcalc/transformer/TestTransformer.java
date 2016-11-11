@@ -4,12 +4,7 @@ import io.github.scyptnex.lcalc.expression.App;
 import io.github.scyptnex.lcalc.expression.Fun;
 import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
-import io.github.scyptnex.lcalc.output.LambdaPrinter;
-import io.github.scyptnex.lcalc.output.TestPrinter;
-import io.github.scyptnex.lcalc.util.Bi;
 import org.junit.Test;
-
-import java.io.ByteArrayOutputStream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;

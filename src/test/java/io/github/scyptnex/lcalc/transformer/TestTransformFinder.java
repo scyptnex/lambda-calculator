@@ -2,7 +2,6 @@ package io.github.scyptnex.lcalc.transformer;
 
 import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
-import io.github.scyptnex.lcalc.output.TextPrinter;
 import io.github.scyptnex.lcalc.parser.TestUntypedExpression;
 import org.junit.Test;
 

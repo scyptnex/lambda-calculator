@@ -1,6 +1,9 @@
 package io.github.scyptnex.lcalc.parser;
 
-import io.github.scyptnex.lcalc.expression.*;
+import io.github.scyptnex.lcalc.expression.App;
+import io.github.scyptnex.lcalc.expression.Fun;
+import io.github.scyptnex.lcalc.expression.Term;
+import io.github.scyptnex.lcalc.expression.Var;
 import io.github.scyptnex.lcalc.parser.gen.UntypedLexer;
 import io.github.scyptnex.lcalc.parser.gen.UntypedParser;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -8,8 +11,7 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -98,6 +100,12 @@ public class TestUntypedExpression {
         Var h = f.getHead();
         Var b = (Var)f.getBody();
         assertTrue("not the same instance", h == b);
+    }
+
+    @Test
+    public void freeVariablesDifferentInstance() throws Exception {
+        App a = (App)parse("x x");
+        assertThat(a.getLhs(), is(not(a.getRhs())));
     }
 
     @Test
