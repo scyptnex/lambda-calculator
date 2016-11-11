@@ -64,6 +64,14 @@ public class TestTransformFinder {
     }
 
     @Test
+    public void applyingToAFunctionThatContainsMeIsNotANameConflictWhenThatFunctionDoesntRedefineMyName() throws Exception {
+        Optional<TransformationEvent> ev = find("\\x.(\\y.(y x))x");
+        assertThat(ev, is(not(Optional.empty())));
+        TransformationEvent tev = ev.get();
+        assertThat(tev.type, is(not(TransformationEvent.TransformType.ALPHA)));
+    }
+
+    @Test
     public void alphaNeverRenamesDefs() throws Exception {
         Optional<TransformationEvent> ev = find("(\\f a.f a I) I", "I", "\\x.x");
         assertThat(ev, is(not(Optional.empty())));

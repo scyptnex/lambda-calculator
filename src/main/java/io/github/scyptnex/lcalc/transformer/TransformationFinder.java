@@ -48,17 +48,16 @@ public class TransformationFinder {
                 Fun lhs = (Fun) t.getLhs();
                 Util.BoundFree rbf = Util.getBoundFree(t.getRhs()), lbf = Util.getBoundFree(lhs.getBody());
                 // i'm conservatively renaming anything that could conflict
-                Set<String> namesInBody = Stream.concat(lbf.bound.stream(), lbf.free.stream())
+                Map<String, Var> namesInBody = Stream.concat(lbf.bound.stream(), lbf.free.stream())
                         .filter(v -> !v.equals(lhs.getHead())) // conflicts with the binding var (itself) don't matter
-                        .map(Var::getBaseName)
-                        .collect(Collectors.toSet());
-                // at this point we know the optional exists
+                        .collect(Collectors.toMap(Var::getBaseName, v -> v));
                 return Optional.of(Stream.concat(rbf.bound.stream(), rbf.free.stream())
                         .map(v -> new Bi<>(v, v.getBaseName()))
-                        .filter(b -> namesInBody.contains(b.second))
-                        .findAny()                                        // if there is any name conflict
-                        .filter(n -> !definitions.containsKey(n.second))  // which is not for a definition
-                        .map(n -> chooseAlpha(n.first, namesInBody, rbf)) // map it to an alpha transform and return
+                        .filter(b -> namesInBody.containsKey(b.second))            // For names also in the body
+                        .filter(b -> b.first != namesInBody.get(b.second))         // which are not the same variable
+                        .filter(b -> !definitions.containsKey(b.second))           // and are not for a definition
+                        .findAny()                                                 // if there is any name conflict
+                        .map(n -> chooseAlpha(n.first, namesInBody.keySet(), rbf)) // map it to an alpha and return
                         .orElseGet(() -> TransformationEvent.makeBeta(base, (Fun)t.getLhs(), t.getRhs())));
             }
             Optional<TransformationEvent> left = visit(null, t.getLhs());

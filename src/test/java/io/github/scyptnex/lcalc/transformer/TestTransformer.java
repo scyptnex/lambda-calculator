@@ -4,7 +4,12 @@ import io.github.scyptnex.lcalc.expression.App;
 import io.github.scyptnex.lcalc.expression.Fun;
 import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
+import io.github.scyptnex.lcalc.output.LambdaPrinter;
+import io.github.scyptnex.lcalc.output.TestPrinter;
+import io.github.scyptnex.lcalc.util.Bi;
 import org.junit.Test;
+
+import java.io.ByteArrayOutputStream;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
@@ -57,6 +62,27 @@ public class TestTransformer {
         assertThat(f.getHead(), is(not(important)));
         assertThat(f.getHead().getBaseName(), is(important.getBaseName()));
         assertThat(((App)f.getBody()).getRhs(), is(f.getHead()));
+    }
+
+    @Test
+    public void betaPreservesAcrossBoundaries(){
+        Var u = new Var("unchanged");
+        Var s = new Var("substituted");
+        Var m1 = new Var("misc1");
+        Var m2 = new Var("misc2");
+        Fun used = new Fun(s, new App(s, new App(u, m1)));
+        App needed = new App(m2, u);
+        App beta = new App(used, needed);
+        Fun outer = new Fun(u, beta);
+        // \\u.(\\s.s (u m1)) (m2, u)
+        TransformationEvent tev = TransformationEvent.makeBeta(outer, used, needed);
+        Fun t = (Fun)new Transformer().apply(tev);
+        Var newU = t.getHead();
+        assertThat(t.getHead(), is(newU));
+        App lhs = (App)(((App)t.getBody()).getLhs());
+        App rhs = (App)(((App)t.getBody()).getRhs());
+        assertThat("the substitution itself should preserve: " + newU.getBaseName() + "=" + ((Var)lhs.getRhs()).getBaseName(), lhs.getRhs(), is(newU));
+        assertThat("the thing that was not substituted should preserve: " + newU.getBaseName() + "=" + ((Var)rhs.getLhs()).getBaseName(), rhs.getLhs(), is(newU));
     }
 
     @Test

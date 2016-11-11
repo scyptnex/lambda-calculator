@@ -55,12 +55,8 @@ public class Transformer implements Function<TransformationEvent, Term> {
             varMap = new HashMap<>();
         }
 
-        private DuplicateReplace(){
-            replaceMe = Optional.empty();
-            applyMe = Optional.empty();
-            withMe = null;
-            alsoDuplicateReplacement = false;
-            varMap = new HashMap<>();
+        private DuplicateReplace(Map<Var, Var> m){
+            this(null, m, null, false);
         }
 
         @Override
@@ -86,9 +82,11 @@ public class Transformer implements Function<TransformationEvent, Term> {
         @Override
         public Term visitVar(Void nul, Var t) {
             if(replaceMe.map(t::equals).orElse(false)){
-                return alsoDuplicateReplacement ? new DuplicateReplace().visit(null, withMe) : withMe;
+                return alsoDuplicateReplacement ? new DuplicateReplace(varMap).visit(null, withMe) : withMe;
             } else {
-                if(!varMap.containsKey(t)) varMap.put(t, new Var(t.getBaseName()));
+                if(!varMap.containsKey(t)){
+                    varMap.put(t, new Var(t.getBaseName()));
+                }
                 return varMap.get(t);
             }
         }
