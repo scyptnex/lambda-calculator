@@ -1,0 +1,19 @@
+// basic
+# SUCC     \n s z . s (n s z)
+
+// numbers
+# ZERO     \s z . z
+# ONE      SUCC ZERO
+# TWO      SUCC ONE
+# THREE    SUCC TWO
+# FOUR     SUCC THREE
+# FIVE     SUCC FOUR
+# SIX      SUCC FIVE
+# SEVEN    SUCC SIX
+# EIGHT    SUCC SEVEN
+# NINE     SUCC EIGHT
+# TEN      SUCC NINE
+
+// arithmetic
+# ADD      \m n s z . m s (n s z)
+# MULT     \m n . m (ADD n) ZERO
