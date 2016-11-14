@@ -16,4 +16,6 @@
 
 // arithmetic
 # ADD      \m n s z . m s (n s z)
-# MULT     \m n . m (ADD n) ZERO
+# MULT     \m n f. m (n f)
+// # MULT     \m n . m (ADD n) ZERO
+# POW      \m n . n m
