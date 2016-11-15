@@ -17,7 +17,10 @@ import java.util.stream.Stream;
 public class TransformationFinder implements Visitor<Void, Optional<TransformationEvent>>{
 
     public static Optional<TransformationEvent> find(Term t, Map<String, Term> defs){
-        return new TransformationFinder(t, defs).visit(null, t);
+        TransformationFinder tf = new TransformationFinder(t, defs);
+        Optional<TransformationEvent> tev = tf.new KappaFinder().visit(true, t);
+        if(tev.isPresent()) return tev;
+        return tf.visit(null, t);
     }
 
     private final Term base;
@@ -99,6 +102,33 @@ public class TransformationFinder implements Visitor<Void, Optional<Transformati
             if(!taken.contains(newName + sfx)){
                 return TransformationEvent.makeAlpha(base, conflict, new Var(newName + sfx));
             }
+        }
+    }
+
+    private class KappaFinder implements Visitor<Boolean, Optional<TransformationEvent>>{
+
+        @Override
+        public Optional<TransformationEvent> visitApp(Boolean mightBeLeftMost, App t) {
+            if(!mightBeLeftMost
+                    && t.getLhs() instanceof Var
+                    && t.getRhs() instanceof Var
+                    && definitions.containsKey(((Var) t.getLhs()).getBaseName())
+                    && definitions.containsKey(((Var) t.getRhs()).getBaseName())){
+                return Optional.of(TransformationEvent.makeKappa(base, t));
+            }
+            Optional<TransformationEvent> left = visit(mightBeLeftMost, t.getLhs());
+            if(left.isPresent()) return left;
+            else return visit(false, t.getRhs());
+        }
+
+        @Override
+        public Optional<TransformationEvent> visitFun(Boolean mightBeLeftMost, Fun t) {
+            return visit(false, t.getBody());
+        }
+
+        @Override
+        public Optional<TransformationEvent> visitVar(Boolean mightBeLeftMost, Var t) {
+            return Optional.empty();
         }
     }
 

@@ -20,6 +20,7 @@ public class Transformer implements Function<TransformationEvent, Term> {
         switch(tev.type){
             case ALPHA : return new DuplicateReplace((Var)tev.relevantSubTerm, tev.transformation, false).visit(null, tev.totalTerm);
             case BETA: return new DuplicateReplace((Fun)tev.relevantSubTerm, tev.transformation, false).visit(null, tev.totalTerm);
+            case KAPPA: throw new RuntimeException("THIS IS MINDLESSLY COMPLICATED");
             default /*DELTA*/: return new DuplicateReplace((Var)tev.relevantSubTerm, tev.transformation, true).visit(null, tev.totalTerm);
         }
     }
