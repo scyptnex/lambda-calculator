@@ -1,5 +1,6 @@
 package io.github.scyptnex.lcalc.transformer;
 
+import io.github.scyptnex.lcalc.expression.App;
 import io.github.scyptnex.lcalc.expression.Fun;
 import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
@@ -12,7 +13,7 @@ import io.github.scyptnex.lcalc.expression.Var;
 public class TransformationEvent {
 
     public enum TransformType{
-        ALPHA, BETA, ETA, DELTA
+        ALPHA, BETA, ETA, DELTA, KAPPA
     }
 
     public final Term totalTerm;
@@ -46,6 +47,13 @@ public class TransformationEvent {
      */
     public static TransformationEvent makeDelta(Term total, Var name, Term def){
         return new TransformationEvent(total, name, TransformType.DELTA, def);
+    }
+
+    /**
+     * For eagerly evaluating constant terms
+     */
+    public static TransformationEvent makeKappa(Term total, App from){
+        return new TransformationEvent(total, from, TransformType.KAPPA, null);
     }
 
 }

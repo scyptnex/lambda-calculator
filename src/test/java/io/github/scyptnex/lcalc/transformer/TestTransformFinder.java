@@ -98,4 +98,26 @@ public class TestTransformFinder {
         assertThat(((Var)tev.transformation).getBaseName(), is("a'1"));
     }
 
+    @Test
+    public void leftmostAppCanNotCauseKappa() throws Exception {
+        Optional<TransformationEvent> ev = find("I I", "I", "\\x.x");
+        assertThat(ev, is(not(Optional.empty())));
+        TransformationEvent tev = ev.get();
+        assertThat(tev.type, is(not(TransformationEvent.TransformType.KAPPA)));
+    }
+
+    @Test
+    public void kappaBeforeBeta() throws Exception {
+        Optional<TransformationEvent> ev = find("(\\f.I I f) x", "I", "\\x.x");
+        assertThat(ev, is(not(Optional.empty())));
+        TransformationEvent tev = ev.get();
+        assertThat(tev.type, is(TransformationEvent.TransformType.KAPPA));
+    }
+
+    @Test
+    public void kappaOnlyOnConstants() throws Exception {
+        Optional<TransformationEvent> ev = find("f I I", "I", "\\x.x");
+        assertThat(ev, is(Optional.empty()));
+    }
+
 }
