@@ -31,31 +31,71 @@ Given the input:
 The calculator shows all the intermediate working steps (we call the substitution of a dictioanry value to an identifier the "delta" transformation) and produces an answer:
 
 ```
--- DELTA --
-(NOT TRUE)
-NOT -> (λ f.(λ x.(λ y.((f y) x))))
---------
--- BETA --
-((λ f.(λ x.(λ y.((f y) x)))) TRUE)
-(λ f.(λ x.(λ y.((f y) x)))) -> TRUE
---------
--- DELTA --
-(λ x.(λ y.((TRUE y) x)))
-TRUE -> (λ x.(λ y.x))
---------
--- ALPHA --
-(λ x.(λ y.(((λ x.(λ y.x)) y) x)))
-y -> y'
---------
--- BETA --
-(λ x.(λ y'.(((λ x.(λ y.x)) y') x)))
-(λ x.(λ y.x)) -> y'
---------
--- BETA --
-(λ x.(λ y'.((λ y.y') x)))
-(λ y.y') -> x
---------
-(λ x.(λ y'.y'))
+- DELTA -
+NOT TRUE
+NOT <- λ f x y.f y x
+---------
+- BETA  -
+(λ f x y.f y x) TRUE
+f <- TRUE
+---------
+- DELTA -
+λ x y.TRUE y x
+TRUE <- λ x y.x
+---------
+- ALPHA -
+λ x y.(λ x y.x) y x <--> y
+---------
+- BETA  -
+λ x y'.(λ x y.x) y' x
+x <- y'
+---------
+- BETA  -
+λ x y'.(λ y.y') x
+y <- x
+---------
+λ x y'.y'
+```
+
+A more complicated example:
+
+```
+? YCOMBI (\f n . IF (ISZERO n) ONE (MULT (f (PRED n)) n))
+
+- DELTA -
+YCOMBI λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n) THREE
+YCOMBI <- λ g.(λ x.g (x x)) λ x.g (x x)
+---------
+- BETA  -
+(λ g.(λ x.g (x x)) λ x.g (x x)) λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n) THREE
+g <- λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)
+---------
+...
+- BETA  -
+(λ y.y) (MULT ((λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x)) λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x) (PRED THREE)) THREE)
+y <- MULT ((λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x)) λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x) (PRED THREE)) THREE
+---------
+...
+- DELTA -
+λ f.ISZERO (PRED (PRED (PRED THREE))) ONE (MULT ((λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x) (PRED (PRED (PRED (PRED THREE))))) (PRED (PRED (PRED THREE)))) (PRED (PRED THREE) (PRED THREE (THREE f)))
+ISZERO <- λ n.n λ x.FALSE TRUE
+---------
+...
+- BETA  -
+λ f.(λ y.ONE) (MULT ((λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x) (PRED (PRED (PRED (PRED THREE))))) (PRED (PRED (PRED THREE)))) (PRED (PRED THREE) (PRED THREE (THREE f)))
+y <- MULT ((λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x) (PRED (PRED (PRED (PRED THREE))))) (PRED (PRED (PRED THREE)))
+---------
+- DELTA -
+λ f.ONE (PRED (PRED THREE) (PRED THREE (THREE f)))
+ONE <- λ s z.s z
+---------
+...
+---------
+- BETA  -
+λ f z.f (f (f (f (f (f ((λ u'.z) (PRED THREE (THREE f))))))))
+u' <- PRED THREE (THREE f)
+---------
+λ f z.f (f (f (f (f (f z)))))
 ```
 
 Design

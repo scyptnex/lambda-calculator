@@ -1,0 +1,80 @@
+//=========//
+// BOOLEAN //
+//=========//
+
+// Booleans
+# TRUE
+    \x y . x
+# FALSE
+    \x y . y
+
+// Logic
+# NOT
+    \f x y . f y x
+# OR
+    \a b x y . a x (b x y)
+# AND
+    \a b x y . a (b x y) y
+
+// Control
+# IF
+    \t . t
+
+//=========//
+// NUMERIC //
+//=========//
+
+// basic
+# SUCC
+    \n s z . s (n s z)
+# PRED
+    \n f x . n (\g h . h (g f)) (\u . x) (\u . u)
+
+// numbers
+# ZERO
+    \s z . z
+# ONE
+    SUCC ZERO
+# TWO
+    SUCC ONE
+# THREE
+    SUCC TWO
+# FOUR
+    SUCC THREE
+# FIVE
+    SUCC FOUR
+# SIX
+    SUCC FIVE
+# SEVEN
+    SUCC SIX
+# EIGHT
+    SUCC SEVEN
+# NINE
+    SUCC EIGHT
+# TEN
+    SUCC NINE
+
+// arithmetic
+# ADD
+    \m n s z . m s (n s z)
+# SUB
+    \m n . n PRED m
+# MULT
+    \m n f. m (n f)
+# POW
+    \m n . n m
+
+// comparisons
+# ISZERO
+    \n . n (\x . FALSE) TRUE
+# LEQ
+    \m n . ISZERO (SUB m n)
+
+//======//
+// UTIL //
+//======//
+
+// recursion
+# YCOMBI
+    \g . (\x . g (x x)) (\x . g (x x))
+

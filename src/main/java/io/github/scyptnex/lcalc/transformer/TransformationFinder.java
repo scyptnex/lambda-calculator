@@ -14,10 +14,10 @@ import java.util.stream.Stream;
 /**
  * finds potential transformations in the given term, dependant on the given map
  */
-public class TransformationFinder {
+public class TransformationFinder implements Visitor<Void, Optional<TransformationEvent>>{
 
     public static Optional<TransformationEvent> find(Term t, Map<String, Term> defs){
-        return new TransformationFinder(t, defs).result();
+        return new TransformationFinder(t, defs).visit(null, t);
     }
 
     private final Term base;
@@ -30,54 +30,46 @@ public class TransformationFinder {
         this.definitions = definitions;
     }
 
-    private Optional<TransformationEvent> result(){
-        Optional<TransformationEvent> ret = Optional.empty();
-        if(!ret.isPresent()) ret = new FunctionApplier().visit(null, base);
-        if(!ret.isPresent()) ret = new VarSubstitutor().visit(null, base);
-        return ret;
+    @Override
+    public Optional<TransformationEvent> visitApp(Void aVoid, App t) {
+        // first, is this application valid
+        if(t.getLhs() instanceof Fun){
+            Fun lhs = (Fun) t.getLhs();
+            Util.BoundFree rbf = Util.getBoundFree(t.getRhs()), lbf = Util.getBoundFree(lhs.getBody());
+            // i'm conservatively renaming anything that could conflict
+            Map<String, Var> namesInBody = Stream.concat(lbf.bound.stream(), lbf.free.stream())
+                    .filter(v -> !v.equals(lhs.getHead())) // conflicts with the binding var (itself) don't matter
+                    // duplicates matter, because they could be different bindings, but
+                    // only free vars can do this, so its safe to choose the second
+                    // because free vars come after bound
+                    .collect(Collectors.toMap(Var::getBaseName, v -> v, (v1, v2) -> v2));
+            return Optional.of(Stream.concat(rbf.bound.stream(), rbf.free.stream())
+                    .map(v -> new Bi<>(v, v.getBaseName()))
+                    .filter(b -> namesInBody.containsKey(b.second))            // For names also in the body
+                    .filter(b -> b.first != namesInBody.get(b.second))         // which are not the same variable
+                    .filter(b -> !definitions.containsKey(b.second))           // and are not for a definition
+                    .findAny()                                                 // if there is any name conflict
+                    .map(n -> chooseAlpha(n.first, namesInBody.keySet(), rbf)) // map it to an alpha and return
+                    .orElseGet(() -> TransformationEvent.makeBeta(base, (Fun)t.getLhs(), t.getRhs())));
+        } else if(t.getLhs() instanceof Var){
+            String nm = ((Var) t.getLhs()).getBaseName();
+            if(definitions.containsKey(nm) && bf.free.contains(t.getLhs())){
+                return Optional.of(TransformationEvent.makeDelta(base, (Var)t.getLhs(), definitions.get(nm)));
+            }
+        }
+        Optional<TransformationEvent> left = visit(null, t.getLhs());
+        if(left.isPresent()) return left;
+        else return visit(null, t.getRhs());
     }
 
-    /**
-     * For performing beta substitution when the lhs of an application is a lambda
-     */
-    private class FunctionApplier implements Visitor<Void, Optional<TransformationEvent>>{
+    @Override
+    public Optional<TransformationEvent> visitFun(Void aVoid, Fun t) {
+        return visit(null, t.getBody());
+    }
 
-        @Override
-        public Optional<TransformationEvent> visitApp(Void aVoid, App t) {
-            // first, is this application valid
-            if(t.getLhs() instanceof Fun){
-                Fun lhs = (Fun) t.getLhs();
-                Util.BoundFree rbf = Util.getBoundFree(t.getRhs()), lbf = Util.getBoundFree(lhs.getBody());
-                // i'm conservatively renaming anything that could conflict
-                Map<String, Var> namesInBody = Stream.concat(lbf.bound.stream(), lbf.free.stream())
-                        .filter(v -> !v.equals(lhs.getHead())) // conflicts with the binding var (itself) don't matter
-                        // duplicates matter, because they could be different bindings, but
-                        // only free vars can do this, so its safe to choose the second
-                        // because free vars come after bound
-                        .collect(Collectors.toMap(Var::getBaseName, v -> v, (v1, v2) -> v2));
-                return Optional.of(Stream.concat(rbf.bound.stream(), rbf.free.stream())
-                        .map(v -> new Bi<>(v, v.getBaseName()))
-                        .filter(b -> namesInBody.containsKey(b.second))            // For names also in the body
-                        .filter(b -> b.first != namesInBody.get(b.second))         // which are not the same variable
-                        .filter(b -> !definitions.containsKey(b.second))           // and are not for a definition
-                        .findAny()                                                 // if there is any name conflict
-                        .map(n -> chooseAlpha(n.first, namesInBody.keySet(), rbf)) // map it to an alpha and return
-                        .orElseGet(() -> TransformationEvent.makeBeta(base, (Fun)t.getLhs(), t.getRhs())));
-            }
-            Optional<TransformationEvent> left = visit(null, t.getLhs());
-            if(left.isPresent()) return left;
-            else return visit(null, t.getRhs());
-        }
-
-        @Override
-        public Optional<TransformationEvent> visitFun(Void aVoid, Fun t) {
-            return visit(null, t.getBody());
-        }
-
-        @Override
-        public Optional<TransformationEvent> visitVar(Void aVoid, Var t) {
-            return Optional.empty();
-        }
+    @Override
+    public Optional<TransformationEvent> visitVar(Void aVoid, Var t) {
+        return Optional.empty();
     }
 
     /**
@@ -107,35 +99,6 @@ public class TransformationFinder {
             if(!taken.contains(newName + sfx)){
                 return TransformationEvent.makeAlpha(base, conflict, new Var(newName + sfx));
             }
-        }
-    }
-
-    /**
-     * For performing delta substitution when an identifier is defined in the map of variables
-     */
-    private class VarSubstitutor implements Visitor<Void, Optional<TransformationEvent>>{
-
-        @Override
-        public Optional<TransformationEvent> visitApp(Void v, App t) {
-            if(t.getLhs() instanceof Var){
-                String nm = ((Var) t.getLhs()).getBaseName();
-                if(definitions.containsKey(nm) && bf.free.contains(t.getLhs())){
-                    return Optional.of(TransformationEvent.makeDelta(base, (Var)t.getLhs(), definitions.get(nm)));
-                }
-            }
-            Optional<TransformationEvent> left = visit(null, t.getLhs());
-            if(left.isPresent()) return left;
-            return visit(null, t.getRhs());
-        }
-
-        @Override
-        public Optional<TransformationEvent> visitFun(Void v, Fun t) {
-            return visit(null, t.getBody());
-        }
-
-        @Override
-        public Optional<TransformationEvent> visitVar(Void v, Var t) {
-            return Optional.empty();
         }
     }
 
