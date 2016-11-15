@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Class that actually does the transformation given some TransformationEvent
@@ -82,14 +83,43 @@ public class Transformer implements Function<TransformationEvent, Term> {
         @Override
         public Term visitVar(Void nul, Var t) {
             if(replaceMe.map(t::equals).orElse(false)){
-                // TODO "? MULT THREE TWO" - this replaces all instances of the definition, but i'd like to lazily replace only the shallow ones
-                return alsoDuplicateReplacement ? new DuplicateReplace(varMap).visit(null, withMe) : withMe;
+                if(alsoDuplicateReplacement){
+                    // in case a variable is replaced multiple times, new variables in one should not be accessible in the other
+                    Map<Var, Var> copy = varMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (v1, v2) -> v2, HashMap::new));
+                    return new DuplicateReplace(copy).visit(null, withMe);
+                } else {
+                    return withMe;
+                }
             } else {
                 if(!varMap.containsKey(t)){
                     varMap.put(t, new Var(t.getBaseName()));
                 }
                 return varMap.get(t);
             }
+        }
+    }
+
+    public static class DebugRenamer implements Visitor<Map<String, Term>, Term>{
+
+        public Map<Var, Var> newNames = new HashMap<>();
+
+        @Override
+        public Term visitApp(Map<String, Term> m, App t) {
+            return new App(visit(m, t.getLhs()), visit(m, t.getRhs()));
+        }
+
+        @Override
+        public Term visitFun(Map<String, Term> m, Fun t) {
+            return new Fun((Var)visit(m, t.getHead()), visit(m, t.getBody()));
+        }
+
+        @Override
+        public Term visitVar(Map<String, Term> m, Var t) {
+            if(m.containsKey(t.getBaseName())) return t;
+            if(!newNames.containsKey(t)){
+                newNames.put(t, new Var("v" + newNames.size()));
+            }
+            return newNames.get(t);
         }
     }
 }

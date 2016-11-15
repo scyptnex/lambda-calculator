@@ -6,11 +6,33 @@ import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
 import org.junit.Test;
 
+import java.util.Collections;
+import java.util.HashMap;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 public class TestTransformer {
+
+    @Test
+    public void debugRenamerWorks(){
+        Var x = new Var("X");
+        Var y = new Var("Y");
+        Fun f = (Fun)new Transformer.DebugRenamer().visit(new HashMap<>(), new Fun(x, new App(y, x)));
+        assertThat(f.getHead().getBaseName(), is("v0"));
+        App a = (App) f.getBody();
+        assertThat(a.getRhs(), is(f.getHead()));
+        assertThat(((Var)a.getLhs()).getBaseName(), is("v1"));
+    }
+
+    @Test
+    public void debugRenamerDoesNotRenameDefinitions(){
+        Var name = new Var("NAME");
+        Var repl = new Var("REPLACE");
+        Var t = (Var)new Transformer.DebugRenamer().visit(Collections.singletonMap("NAME", repl), name);
+        assertThat(t.getBaseName(), is("NAME"));
+    }
 
     @Test
     public void alphaDoesNotDuplicate(){
@@ -81,7 +103,7 @@ public class TestTransformer {
     }
 
     @Test
-    public void deltaDuplicatesAllTerms(){
+    public void deltaDuplicatesEntireTerm(){
         Var body = new Var("foo");
         Var def = new Var("bar");
         Var head = new Var("baz");
@@ -93,6 +115,20 @@ public class TestTransformer {
         assertThat(out.getBody(), is(not(def)));
         assertThat(out.getHead().getBaseName(), is(head.getBaseName()));
         assertThat(((Var)out.getBody()).getBaseName(), is(def.getBaseName()));
+    }
+
+    // TODO this is actually a temporary, ideally delta would not be allowed to replace more than once
+    @Test
+    public void deltaReplacesWithDifferentDuplicates() {
+        Var src = new Var("replaceMe");
+        Var dst = new Var("withMe");
+        TransformationEvent tev = TransformationEvent.makeDelta(new App(src, src), src, dst);
+        App out = (App) new Transformer().apply(tev);
+        assertThat(out.getLhs(), is(not(dst)));
+        assertThat(out.getRhs(), is(not(dst)));
+        assertThat(((Var)out.getLhs()).getBaseName(), is(dst.getBaseName()));
+        assertThat(((Var)out.getRhs()).getBaseName(), is(dst.getBaseName()));
+        assertThat("Each replacement must be different from the others", out.getLhs(), is(not(out.getRhs())));
     }
 
 }

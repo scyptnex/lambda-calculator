@@ -9,7 +9,9 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -90,6 +92,26 @@ public class TestApplication {
         Term ycomb = TestUntypedExpression.parse("\\f.(\\x.f (x x)) (\\x.f (x x))");
         Term t = withArgs().evaluate(ycomb);
         assertThat(t, is(ycomb));
+    }
+
+    /*********************************
+     *      Whole program cases      *
+     *********************************/
+
+    private void queryAfterLoading(String query, String... libs) throws IOException {
+        String[] args = new String[3 + libs.length];
+        args[0] = "-qq";
+        System.arraycopy(libs, 0, args, 1, libs.length);
+        args[args.length-2] = "-vv";
+        args[args.length-1] = "-i";
+        Application app = new Application();
+        app.acceptArguments(args);
+        app.interpret(new ByteArrayInputStream(query.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    public void powTwoThree() throws IOException {
+        queryAfterLoading("? POW TWO THREE", "src/dist/stdNumber.lc");
     }
 
 }
