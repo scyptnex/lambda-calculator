@@ -1,5 +1,6 @@
 package io.github.scyptnex.lcalc.expression;
 
+import io.github.scyptnex.lcalc.BaseTest;
 import io.github.scyptnex.lcalc.parser.TestUntypedExpression;
 import org.junit.Test;
 
@@ -10,7 +11,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class TestUtil {
+public class TestUtil extends BaseTest{
 
     private Set<Term> setof(Term...ts){
         return Arrays.stream(ts).collect(Collectors.toSet());
@@ -50,7 +51,7 @@ public class TestUtil {
 
     @Test
     public void freeOnOuterEvenIfBoundOnInner() throws Exception {
-        App t = (App)TestUntypedExpression.parse("foo \\foo.foo");
+        App t = (App)parse("foo \\foo.foo");
         Util.BoundFree bf = Util.getBoundFree(t);
         assertThat(bf.bound, is(setof(((Fun)t.getRhs()).getHead())));
         assertThat(bf.free, is(setof(t.getLhs())));

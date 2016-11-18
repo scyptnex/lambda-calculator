@@ -1,5 +1,6 @@
 package io.github.scyptnex.lcalc.parser;
 
+import io.github.scyptnex.lcalc.BaseTest;
 import io.github.scyptnex.lcalc.expression.App;
 import io.github.scyptnex.lcalc.expression.Fun;
 import io.github.scyptnex.lcalc.expression.Term;
@@ -15,18 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-public class TestUntypedExpression {
-
-    public static Term parse(String s) throws Exception{
-        UntypedLexer lex = new UntypedLexer(new ANTLRInputStream(s));
-        CommonTokenStream cts = new CommonTokenStream(lex);
-        UntypedParser par = new UntypedParser(cts);
-
-        // We want to throw an error where possible
-        par.setErrorHandler(new BailErrorStrategy());
-        return TermBuilder.build(par.expression());
-
-    }
+public class TestUntypedExpression extends BaseTest{
 
     @Test
     public void parsesVar() throws Exception {

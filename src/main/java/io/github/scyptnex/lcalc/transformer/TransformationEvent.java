@@ -13,7 +13,7 @@ import io.github.scyptnex.lcalc.expression.Var;
 public class TransformationEvent {
 
     public enum TransformType{
-        ALPHA, BETA, ETA, DELTA, KAPPA
+        ALPHA, BETA, ETA, DELTA, SIGMA
     }
 
     public final Term totalTerm;
@@ -50,10 +50,10 @@ public class TransformationEvent {
     }
 
     /**
-     * For eagerly evaluating constant terms
+     * For eagerly evaluating constant terms into existing definitions
      */
-    public static TransformationEvent makeKappa(Term total, App from){
-        return new TransformationEvent(total, from, TransformType.KAPPA, null);
+    public static TransformationEvent makeSigma(Term total, App from, Var to){
+        return new TransformationEvent(total, from, TransformType.SIGMA, to);
     }
 
 }

@@ -131,4 +131,15 @@ public class TestTransformer {
         assertThat("Each replacement must be different from the others", out.getLhs(), is(not(out.getRhs())));
     }
 
+    @Test
+    public void sigmaDuplicatesItsReplacement() {
+        Var x = new Var("x");
+        Var y = new Var("y");
+        Var z = new Var("z");
+        App a = new App(x, y);
+        Var out = (Var) new Transformer().apply(TransformationEvent.makeSigma(a, a, z));
+        assertThat(out, is(not(z)));
+        assertThat(out.getBaseName(), is(z.getBaseName()));
+    }
+
 }

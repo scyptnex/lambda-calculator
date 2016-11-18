@@ -16,7 +16,7 @@ import java.util.Arrays;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-public class TestApplication {
+public class TestApplication extends BaseTest{
 
     private Application withArgs(String... args) throws IOException {
         Application ret = new Application();
@@ -89,7 +89,7 @@ public class TestApplication {
 
     @Test
     public void evaluateInfiniteReturnsOriginal() throws Exception {
-        Term ycomb = TestUntypedExpression.parse("\\f.(\\x.f (x x)) (\\x.f (x x))");
+        Term ycomb = parse("\\f.(\\x.f (x x)) (\\x.f (x x))");
         Term t = withArgs().evaluate(ycomb);
         assertThat(t, is(ycomb));
     }
