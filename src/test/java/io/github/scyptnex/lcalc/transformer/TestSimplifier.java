@@ -4,6 +4,8 @@ import io.github.scyptnex.lcalc.Application;
 import io.github.scyptnex.lcalc.BaseTest;
 import io.github.scyptnex.lcalc.expression.App;
 import io.github.scyptnex.lcalc.expression.Term;
+import io.github.scyptnex.lcalc.expression.Var;
+import io.github.scyptnex.lcalc.util.Bi;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -95,23 +97,43 @@ public class TestSimplifier extends BaseTest{
     @Test
     public void candidateExistsWithinFunction() throws Exception {
         Simplifier s = mockApp("I", "\\x.x");
-        Optional<App> found1 = s.findCandidate(parse("\\f.I I f"));
-        assertThat(found1, is(not(Optional.empty())));
-        Optional<App> found2 = s.findCandidate(parse("\\f.f (I I)"));
-        assertThat(found2, is(not(Optional.empty())));
+        assertThat(s.findCandidate(parse("\\f.I I f")), is(not(Optional.empty())));
+        assertThat(s.findCandidate(parse("\\f.f (I I)")), is(not(Optional.empty())));
     }
 
     @Test
     public void leftmostAppCanNotBeCandidate() throws Exception {
         Simplifier s = mockApp("I", "\\x.x");
-        Optional<App> found = s.findCandidate(parse("I I f"));
-        assertThat(found, is(Optional.empty()));
+        assertThat(s.findCandidate(parse("I I f")), is(Optional.empty()));
     }
 
     @Test
     public void onlyAppConstantsCanBeCandidate() throws Exception {
         Simplifier s = mockApp("I", "\\x.x");
-        Optional<App> found = s.findCandidate(parse("f I I"));
-        assertThat(found, is(Optional.empty()));
+        assertThat(s.findCandidate(parse("f I I")), is(Optional.empty()));
+    }
+
+    @Test
+    public void simplifyMakesTransformEvent() throws Exception {
+        Simplifier s = mockApp("ZERO", "\\s z.z", "ONE", "\\s z.s(z)", "SUCC", "\\n s z.s(n s z)");
+        Optional<Bi<TransformationEvent, Optional<Computer>>> res = s.findCandidate(parse("f (SUCC ZERO)"));
+        assertThat(res, is(not(Optional.empty())));
+        assertThat(res.get().first.type, is(TransformationEvent.TransformType.SIGMA));
+        assertThat(((Var)res.get().first.transformation).getBaseName(), is("ONE"));
+    }
+
+    @Test
+    public void newSimplificationsReturnAComputation() throws Exception {
+        Simplifier s = mockApp("ZERO", "\\s z.z", "ONE", "\\s z.s(z)", "SUCC", "\\n s z.s(n s z)");
+        Optional<Bi<TransformationEvent, Optional<Computer>>> res = s.findCandidate(parse("f (SUCC ZERO)"));
+        assertThat(res.get().second, is(not(Optional.empty())));
+    }
+
+    @Test
+    public void oldSimplificationsOmitTheComputation() throws Exception {
+        Simplifier s = mockApp("ZERO", "\\s z.z", "ONE", "\\s z.s(z)", "SUCC", "\\n s z.s(n s z)");
+        s.findCandidate(parse("f1 (SUCC ZERO)"));
+        Optional<Bi<TransformationEvent, Optional<Computer>>> res2 = s.findCandidate(parse("f2 (SUCC ZERO)"));
+        assertThat(res2.get().second, is(Optional.empty()));
     }
 }

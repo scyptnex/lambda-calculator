@@ -1,6 +1,7 @@
 package io.github.scyptnex.lcalc.transformer;
 
 import io.github.scyptnex.lcalc.expression.Term;
+import io.github.scyptnex.lcalc.util.Bi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,10 @@ public class Computer {
     public final List<TransformationEvent> steps;
 
     private Computer(Term original, int max, Map<String, Term> definitions){
+        this(original, max, definitions, null);
+    }
+
+    private Computer(Term original, int max, Map<String, Term> definitions, Simplifier smpl){
         Term result = original;
         List<TransformationEvent> steps = new ArrayList<>();
         Optional<TransformationEvent> tev = TransformationFinder.find(result, definitions);
@@ -29,6 +34,16 @@ public class Computer {
                 steps = null;
                 break;
             }
+            // TODO uncomment
+//            if(smpl != null){
+//                Optional<Bi<TransformationEvent, Optional<Computer>>> simplification = smpl.findCandidate(result);
+//                while(simplification.isPresent()){
+//                    if(simplification.get().second.isPresent()) steps.addAll(simplification.get().second.get().steps);
+//                    steps.add(simplification.get().first);
+//                    result = new Transformer().apply(simplification.get().first);
+//                    simplification = smpl.findCandidate(result);
+//                }
+//            }
             tev = TransformationFinder.find(result, definitions);
         }
         this.result = result;

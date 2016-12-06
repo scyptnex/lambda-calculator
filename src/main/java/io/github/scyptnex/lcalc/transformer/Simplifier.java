@@ -1,6 +1,7 @@
 package io.github.scyptnex.lcalc.transformer;
 
 import io.github.scyptnex.lcalc.expression.*;
+import io.github.scyptnex.lcalc.output.TextPrinter;
 import io.github.scyptnex.lcalc.util.Bi;
 
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import java.util.Optional;
  */
 public class Simplifier {
 
+    public static final int SIMPLIFY_MAX_ITERS = 500;
+
     private final Map<String, Term> definitions;
     private final Map<String, String> known;
 
@@ -27,14 +30,45 @@ public class Simplifier {
      * Finds a simplification transformation for the given term
      * @param t The input term
      * @return Optional.none() if there are no simplification opportunities, if an opportunity
-     * exists return it, and if this opportunity had not been discovered before, include the
+     * exists return it (as a transformation event (sigma). If it is new, include the
      * computation used to find it
      */
-
-    public Optional<App> findCandidate(Term t){
-        return new CandidateFinder().visit(true, t);
+    public Optional<Bi<TransformationEvent, Optional<Computer>>> findCandidate(Term t){
+        return computeTrueCandidate(t).map(b -> new Bi<>(TransformationEvent.makeSigma(t, b.first, new Var(known.get(desc(b.first)))), b.second));
     }
 
+    /**
+     * Iteratively finds candidates and simplify-computes them, or seeks a new one if the simplification fails
+     * @param t the term to simplify
+     * @return the application that can be simplified and (if it is new) a computation to simplify it
+     */
+    private Optional<Bi<App, Optional<Computer>>> computeTrueCandidate(Term t){
+        while(true){
+            Optional<App> potential = new CandidateFinder().visit(true, t);
+            if(!potential.isPresent()) return Optional.empty();
+            else {
+                App a = potential.get();
+                String d = desc(a);
+                if(known.containsKey(d)) return Optional.of(new Bi<>(a, Optional.empty()));
+                Computer cmp = Computer.compute(a, SIMPLIFY_MAX_ITERS, definitions);
+                for(String def : definitions.keySet()){
+                    if ((cmp.result instanceof Var && ((Var) cmp.result).getBaseName().equals(def))
+                            || isAlphaEquivalent(cmp.result, definitions.get(def))) {
+                        known.put(d, def);
+                        return Optional.of(new Bi<>(a, Optional.of(cmp)));
+                    }
+                }
+                known.put(d, null); // null definition means no simplification.  TODO what if there are new definitions?
+            }
+        }
+    }
+
+    /**
+     * Determines if two terms are alpha-equivalent (i.e. you can rename one to make the other)
+     * @param a one of the terms
+     * @param b the other term
+     * @return true if a can have its variables renamed to create b
+     */
     public boolean isAlphaEquivalent(Term a, Term b){
         return new AlphaEquivocator().visit(a, b);
     }
@@ -44,6 +78,10 @@ public class Simplifier {
      */
     private String desc(String l, String r){
         return l + " " + r;
+    }
+
+    private String desc(App a){
+        return desc(((Var)a.getLhs()).getBaseName(), ((Var)a.getRhs()).getBaseName());
     }
 
     /**
@@ -86,7 +124,7 @@ public class Simplifier {
     }
 
     /**
-     * Discovers potential simplification targets
+     * Discovers potential simplification targets, if a target could work, it tries to compute it
      */
     private class CandidateFinder implements Visitor<Boolean, Optional<App>> {
         @Override
