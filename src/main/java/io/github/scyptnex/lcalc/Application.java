@@ -85,7 +85,7 @@ public class Application {
      * terminates) or the shortest form (if execution does not terminate)
      */
     public Term evaluate(Term t){
-        Computer computation = Computer.compute(t, MAXIMUM_ITERS, state);
+        Computer computation = Computer.compute(t, MAXIMUM_ITERS, state, simpl);
         LambdaPrinter lp = TextPrinter.unicode(System.out);
         if(computation != null){
             t = computation.result;

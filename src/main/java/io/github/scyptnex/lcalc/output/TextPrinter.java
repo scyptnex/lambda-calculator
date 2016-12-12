@@ -49,6 +49,14 @@ public class TextPrinter extends LambdaPrinter implements Visitor<Void, String>{
     }
 
     @Override
+    public void detailSigma(Term input, App expression, Var result, Term output) {
+        out.println("- SIGMA -");
+        out.println(makePrettyString(input));
+        out.println(makePrettyString(expression) + " => " + makePrettyString(result));
+        out.println("---------");
+    }
+
+    @Override
     public String makePrettyString(Term t) {
         return this.visit(null, t);
     }

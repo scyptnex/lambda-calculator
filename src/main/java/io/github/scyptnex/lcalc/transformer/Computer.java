@@ -16,10 +16,6 @@ public class Computer {
     public final Term result;
     public final List<TransformationEvent> steps;
 
-    private Computer(Term original, int max, Map<String, Term> definitions){
-        this(original, max, definitions, null);
-    }
-
     private Computer(Term original, int max, Map<String, Term> definitions, Simplifier smpl){
         Term result = original;
         List<TransformationEvent> steps = new ArrayList<>();
@@ -34,16 +30,15 @@ public class Computer {
                 steps = null;
                 break;
             }
-            // TODO uncomment
-//            if(smpl != null){
-//                Optional<Bi<TransformationEvent, Optional<Computer>>> simplification = smpl.findCandidate(result);
-//                while(simplification.isPresent()){
-//                    if(simplification.get().second.isPresent()) steps.addAll(simplification.get().second.get().steps);
-//                    steps.add(simplification.get().first);
-//                    result = new Transformer().apply(simplification.get().first);
-//                    simplification = smpl.findCandidate(result);
-//                }
-//            }
+            if(smpl != null){
+                Optional<Bi<TransformationEvent, Optional<Computer>>> simplification = smpl.findCandidate(result);
+                while(simplification.isPresent()){
+                    if(simplification.get().second.isPresent()) steps.addAll(simplification.get().second.get().steps);
+                    steps.add(simplification.get().first);
+                    result = new Transformer().apply(simplification.get().first);
+                    simplification = smpl.findCandidate(result);
+                }
+            }
             tev = TransformationFinder.find(result, definitions);
         }
         this.result = result;
@@ -55,12 +50,17 @@ public class Computer {
      * @param original The input term
      * @param max The maximum number of iterations before bailing out
      * @param definitions The list of string - term pairs of defined expressions
+     * @param simpl The global simplifier to be used during computation
      * @return A compute object containing the resulting term of the computation, and
      * the list of transformations which created that term, null if max is exceeded
      */
-    public static Computer compute(Term original, int max, Map<String, Term> definitions){
-        Computer ret = new Computer(original, max, definitions);
+    public static Computer compute(Term original, int max, Map<String, Term> definitions, Simplifier simpl){
+        Computer ret = new Computer(original, max, definitions, simpl);
         if(ret.result == null) return null;
         return ret;
+    }
+
+    public static Computer compute(Term original, int max, Map<String, Term> definitions){
+        return compute(original, max, definitions, null);
     }
 }

@@ -1,5 +1,6 @@
 package io.github.scyptnex.lcalc.output;
 
+import io.github.scyptnex.lcalc.expression.App;
 import io.github.scyptnex.lcalc.expression.Fun;
 import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
@@ -24,18 +25,12 @@ public abstract class LambdaPrinter {
 
     public abstract void detailDelta(Term input, Var name, Term def, Term output);
 
+    public abstract void detailSigma(Term input, App expression, Var result, Term output);
+
     public abstract String makePrettyString(Term t);
 
-    public void showAlpha(Term result){
-        out.println("alpha - " + makePrettyString(result));
-    }
-
-    public void showBeta(Term result){
-        out.println("beta  - " + makePrettyString(result));
-    }
-
-    public void showDelta(Term result){
-        out.println("delta - " + makePrettyString(result));
+    public void show(String name, Term result) {
+        out.println(name + " - " + makePrettyString(result));
     }
 
     public void printLambda(Term l){
@@ -47,14 +42,11 @@ public abstract class LambdaPrinter {
             switch(tev.type){
                 case ALPHA: {detailAlpha(tev.totalTerm, (Var)tev.relevantSubTerm, next); break;}
                 case BETA:  {detailBeta(tev.totalTerm, (Fun)tev.relevantSubTerm, tev.transformation, next); break;}
-                default:    {detailDelta(tev.totalTerm, (Var)tev.relevantSubTerm, tev.transformation, next); break;}
+                case DELTA: {detailDelta(tev.totalTerm, (Var)tev.relevantSubTerm, tev.transformation, next); break;}
+                default:    {detailSigma(tev.totalTerm, (App)tev.relevantSubTerm, (Var)tev.transformation, next); break;}
             }
         } else {
-            switch(tev.type){
-                case ALPHA: {showAlpha(next); break;}
-                case BETA:  {showBeta(next); break;}
-                default:    {showDelta(next); break;}
-            }
+            show(tev.type.name().toLowerCase(), next);
         }
     }
 
