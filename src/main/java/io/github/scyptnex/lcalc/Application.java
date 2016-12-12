@@ -32,6 +32,7 @@ public class Application {
     public Verbosity verb = Verbosity.NORMAL;
     public Map<String, Term> state = new HashMap<>();
     public Simplifier simpl = new Simplifier(this.state);
+    public Term lastResult = null;
 
     public void acceptArguments(String[] args) throws IOException{
         for(String a : args){
@@ -48,6 +49,8 @@ public class Application {
             else if(Files.exists(Paths.get(a))){
                 interpreting = false;
                 getScriptParser().parse(Paths.get(a));
+            } else {
+                throw new IOException("Non-existant file or unrecognised option: " + a);
             }
         }
     }
@@ -95,6 +98,7 @@ public class Application {
             }
         }
         lp.printLambda(t);
+        lastResult = t;
         return t;
     }
 

@@ -15,6 +15,7 @@ import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 public class TestApplication extends BaseTest{
 
@@ -94,11 +95,21 @@ public class TestApplication extends BaseTest{
         assertThat(t, is(ycomb));
     }
 
+    @Test
+    public void loadNonExistantFileIsError() {
+        try{
+            withArgs("missingFile.txt");
+            fail("Failed to throw an exception for reading a non-existant file.");
+        } catch (Exception exc){
+            //test passed
+        }
+    }
+
     /*********************************
      *      Whole program cases      *
      *********************************/
 
-    private void queryAfterLoading(String query, String... libs) throws IOException {
+    private Application queryAfterLoading(String query, String... libs) throws IOException {
         String[] args = new String[3 + libs.length];
         args[0] = "-qq";
         System.arraycopy(libs, 0, args, 1, libs.length);
@@ -107,11 +118,21 @@ public class TestApplication extends BaseTest{
         Application app = new Application();
         app.acceptArguments(args);
         app.interpret(new ByteArrayInputStream(query.getBytes(StandardCharsets.UTF_8)));
+        return app;
     }
 
     @Test
-    public void powTwoThree() throws IOException {
-        queryAfterLoading("? POW TWO THREE", "src/dist/stdNumber.lc");
+    public void powTwoThree() throws Exception {
+        Application a = queryAfterLoading("? POW TWO THREE", "src/dist/stdlib.lc");
+        Term eight = this.parse("\\s z.s(s(s(s(s(s(s(s z)))))))");
+        assertThat(a.simpl.isAlphaEquivalent(a.lastResult, eight), is(true));
+    }
+
+    @Test
+    public void threeFactorial() throws Exception {
+        Application a = queryAfterLoading("? YCOMBI (\\f n . IF (ISZERO n) ONE (MULT (f (PRED n)) n)) THREE", "src/dist/stdlib.lc");
+        Term eight = this.parse("\\s z.s(s(s(s(s(s z)))))");
+        assertThat(a.simpl.isAlphaEquivalent(a.lastResult, eight), is(true));
     }
 
 }
