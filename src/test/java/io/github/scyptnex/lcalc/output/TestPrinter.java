@@ -94,7 +94,7 @@ public class TestPrinter {
     @Test
     public void showIsShorterThanDescribeAlpha(){
         Var rnm = new Var("x");
-        TransformationEvent tev = TransformationEvent.makeAlpha(rnm, rnm, new Var("z"));
+        TransformationEvent tev = new TransformationEvent.Alpha(rnm, rnm, new Var("z"));
         Term result = new Var("z");
         compareShowToDescribe(tev, result);
     }
@@ -104,7 +104,7 @@ public class TestPrinter {
         Var v = new Var("v");
         Fun lhs = new Fun(v, v);
         Var rhs = new Var("x");
-        TransformationEvent tev = TransformationEvent.makeBeta(new App(lhs, rhs), lhs, rhs);
+        TransformationEvent tev = new TransformationEvent.Beta(new App(lhs, rhs), lhs, rhs);
         Term result = new Var("x");
         compareShowToDescribe(tev, result);
     }
@@ -112,7 +112,7 @@ public class TestPrinter {
     @Test
     public void showIsShorterThanDescribeDelta(){
         Var name = new Var("name");
-        TransformationEvent tev = TransformationEvent.makeDelta(new App(name, new Var("z")), name, new Var("definition"));
+        TransformationEvent tev = new TransformationEvent.Delta(new App(name, new Var("z")), name, new Var("definition"));
         Term result = new Var("definition");
         compareShowToDescribe(tev, result);
     }

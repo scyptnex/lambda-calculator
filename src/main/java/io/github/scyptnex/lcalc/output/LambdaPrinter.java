@@ -39,15 +39,38 @@ public abstract class LambdaPrinter {
 
     public void decode(TransformationEvent tev, Term next, boolean detail){
         if(detail){
-            switch(tev.type){
-                case ALPHA: {detailAlpha(tev.totalTerm, (Var)tev.relevantSubTerm, next); break;}
-                case BETA:  {detailBeta(tev.totalTerm, (Fun)tev.relevantSubTerm, tev.transformation, next); break;}
-                case DELTA: {detailDelta(tev.totalTerm, (Var)tev.relevantSubTerm, tev.transformation, next); break;}
-                default:    {detailSigma(tev.totalTerm, (App)tev.relevantSubTerm, (Var)tev.transformation, next); break;}
-            }
+            new Decoder(next).visit(tev);
         } else {
-            show(tev.type.name().toLowerCase(), next);
+            show(tev.name().toLowerCase(), next);
         }
     }
 
+    /**
+     * Used to dynamically decode the type of the transformation events
+     */
+    private class Decoder implements TransformationEvent.TransformationEventVisitor {
+        public Term next;
+        public Decoder(Term nxt){
+            this.next = nxt;
+        }
+        @Override
+        public void visitAlpha(TransformationEvent.Alpha tev) {
+            detailAlpha(tev.totalTerm, tev.relevantSubTerm, next);
+        }
+
+        @Override
+        public void visitBeta(TransformationEvent.Beta tev) {
+            detailBeta(tev.totalTerm, tev.relevantSubTerm, tev.transformation, next);
+        }
+
+        @Override
+        public void visitDelta(TransformationEvent.Delta tev) {
+            detailDelta(tev.totalTerm, tev.relevantSubTerm, tev.transformation, next);
+        }
+
+        @Override
+        public void visitSigma(TransformationEvent.Sigma tev) {
+            detailSigma(tev.totalTerm, tev.relevantSubTerm, tev.transformation, next);
+        }
+    }
 }

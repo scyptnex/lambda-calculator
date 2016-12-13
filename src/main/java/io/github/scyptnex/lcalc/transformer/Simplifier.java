@@ -34,7 +34,7 @@ public class Simplifier {
      * computation used to find it
      */
     public Optional<Bi<TransformationEvent, Optional<Computer>>> findCandidate(Term t){
-        return computeTrueCandidate(t).map(b -> new Bi<>(TransformationEvent.makeSigma(t, b.first, new Var(known.get(desc(b.first)))), b.second));
+        return computeTrueCandidate(t).map(b -> new Bi<>(new TransformationEvent.Sigma(t, b.first, new Var(known.get(desc(b.first)))), b.second));
     }
 
     /**

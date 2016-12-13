@@ -1,10 +1,8 @@
 package io.github.scyptnex.lcalc.transformer;
 
 import io.github.scyptnex.lcalc.expression.*;
-import io.github.scyptnex.lcalc.output.TextPrinter;
 import io.github.scyptnex.lcalc.util.Bi;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -51,11 +49,11 @@ public class TransformationFinder implements Visitor<Void, Optional<Transformati
                     .filter(b -> !definitions.containsKey(b.second))           // and are not for a definition
                     .findAny()                                                 // if there is any name conflict
                     .map(n -> chooseAlpha(n.first, namesInBody.keySet(), rbf)) // map it to an alpha and return
-                    .orElseGet(() -> TransformationEvent.makeBeta(base, (Fun)t.getLhs(), t.getRhs())));
+                    .orElseGet(() -> new TransformationEvent.Beta(base, (Fun)t.getLhs(), t.getRhs())));
         } else if(t.getLhs() instanceof Var){
             String nm = ((Var) t.getLhs()).getBaseName();
             if(definitions.containsKey(nm) && bf.free.contains(t.getLhs())){
-                return Optional.of(TransformationEvent.makeDelta(base, (Var)t.getLhs(), definitions.get(nm)));
+                return Optional.of(new TransformationEvent.Delta(base, (Var)t.getLhs(), definitions.get(nm)));
             }
         }
         Optional<TransformationEvent> left = visit(null, t.getLhs());
@@ -98,7 +96,7 @@ public class TransformationFinder implements Visitor<Void, Optional<Transformati
         for(int i=0; ; i++){
             String sfx = i>0 ? (i>1 ? "'" + (i-1) : "'") : "";
             if(!taken.contains(newName + sfx)){
-                return TransformationEvent.makeAlpha(base, conflict, new Var(newName + sfx));
+                return new TransformationEvent.Alpha(base, conflict, new Var(newName + sfx));
             }
         }
     }

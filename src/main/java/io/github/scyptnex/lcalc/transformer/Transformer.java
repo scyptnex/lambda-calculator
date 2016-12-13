@@ -12,17 +12,34 @@ import java.util.stream.Collectors;
  * Class that actually does the transformation given some TransformationEvent
  * Implements the visitor for "copy with replacement" semantics
  */
-public class Transformer implements Function<TransformationEvent, Term> {
+public class Transformer implements TransformationEvent.TransformationEventVisitor, Function<TransformationEvent, Term> {
+
+    private Term result;
 
     @Override
     public Term apply(TransformationEvent tev) {
-        // so it seems alpha and beta are meaningless...
-        switch(tev.type){
-            case ALPHA : return new DuplicateReplace((Var)tev.relevantSubTerm, tev.transformation, false).visit(null, tev.totalTerm);
-            case BETA: return new DuplicateReplace((Fun)tev.relevantSubTerm, tev.transformation, false).visit(null, tev.totalTerm);
-            case SIGMA: return new DuplicateReplace((App)tev.relevantSubTerm, (Var)tev.transformation).visit(null, tev.totalTerm);
-            default /*DELTA*/: return new DuplicateReplace((Var)tev.relevantSubTerm, tev.transformation, true).visit(null, tev.totalTerm);
-        }
+        this.visit(tev);
+        return result;
+    }
+
+    @Override
+    public void visitAlpha(TransformationEvent.Alpha tev) {
+        result = new DuplicateReplace(tev.relevantSubTerm, tev.transformation, false).visit(null, tev.totalTerm);
+    }
+
+    @Override
+    public void visitBeta(TransformationEvent.Beta tev) {
+        result = new DuplicateReplace(tev.relevantSubTerm, tev.transformation, false).visit(null, tev.totalTerm);
+    }
+
+    @Override
+    public void visitDelta(TransformationEvent.Delta tev) {
+        result = new DuplicateReplace(tev.relevantSubTerm, tev.transformation, true).visit(null, tev.totalTerm);
+    }
+
+    @Override
+    public void visitSigma(TransformationEvent.Sigma tev) {
+        result = new DuplicateReplace(tev.relevantSubTerm, tev.transformation).visit(null, tev.totalTerm);
     }
 
     /**

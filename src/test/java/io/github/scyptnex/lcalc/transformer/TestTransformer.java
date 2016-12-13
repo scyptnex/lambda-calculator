@@ -39,7 +39,7 @@ public class TestTransformer {
         Var from = new Var("foo");
         Var to = new Var("bar");
         Fun wrap = new Fun(from, from);
-        TransformationEvent tev = TransformationEvent.makeAlpha(wrap, from, to);
+        TransformationEvent tev = new TransformationEvent.Alpha(wrap, from, to);
         Fun out = (Fun)new Transformer().apply(tev);
         assertThat(out.getHead(), is(to));
         assertThat(out.getBody(), is(to));
@@ -50,7 +50,7 @@ public class TestTransformer {
         Var from = new Var("foo");
         Var to = new Var("bar");
         Fun wrap = new Fun(from, from);
-        TransformationEvent tev = TransformationEvent.makeAlpha(wrap, from, to);
+        TransformationEvent tev = new TransformationEvent.Alpha(wrap, from, to);
         Term out = new Transformer().apply(tev);
         assertThat(out, is(not(wrap)));
     }
@@ -61,7 +61,7 @@ public class TestTransformer {
         Fun ident = new Fun(v1, v1);
         Var v2 = new Var("y");
         App total = new App(ident, v2);
-        TransformationEvent tev = TransformationEvent.makeBeta(total, ident, v2);
+        TransformationEvent tev = new TransformationEvent.Beta(total, ident, v2);
         Var ret = (Var)new Transformer().apply(tev);
         assertThat(ret, is(not(v2)));
         assertThat(ret.getBaseName(), is(v2.getBaseName()));
@@ -73,7 +73,7 @@ public class TestTransformer {
         Var replaceMe = new Var("replaceMe");
         Fun pseudoResult = new Fun(important, new App(replaceMe, important));
         App t = new App(new Fun(replaceMe, pseudoResult), new Var("withMe"));
-        TransformationEvent tev = TransformationEvent.makeBeta(t, (Fun)t.getLhs(), t.getRhs());
+        TransformationEvent tev = new TransformationEvent.Beta(t, (Fun)t.getLhs(), t.getRhs());
         Fun f = (Fun)new Transformer().apply(tev);
         assertThat(f, is(not(pseudoResult)));
         assertThat(f.getHead(), is(not(important)));
@@ -92,7 +92,7 @@ public class TestTransformer {
         App beta = new App(used, needed);
         Fun outer = new Fun(u, beta);
         // \\u.(\\s.s (u m1)) (m2, u)
-        TransformationEvent tev = TransformationEvent.makeBeta(outer, used, needed);
+        TransformationEvent tev = new TransformationEvent.Beta(outer, used, needed);
         Fun t = (Fun)new Transformer().apply(tev);
         Var newU = t.getHead();
         assertThat(t.getHead(), is(newU));
@@ -108,7 +108,7 @@ public class TestTransformer {
         Var def = new Var("bar");
         Var head = new Var("baz");
         Fun wrap = new Fun(head, body);
-        TransformationEvent tev = TransformationEvent.makeDelta(wrap, body, def);
+        TransformationEvent tev = new TransformationEvent.Delta(wrap, body, def);
         Fun out = (Fun)new Transformer().apply(tev);
         assertThat(out, is(not(wrap)));
         assertThat(out.getHead(), is(not(head)));
@@ -122,7 +122,7 @@ public class TestTransformer {
     public void deltaReplacesWithDifferentDuplicates() {
         Var src = new Var("replaceMe");
         Var dst = new Var("withMe");
-        TransformationEvent tev = TransformationEvent.makeDelta(new App(src, src), src, dst);
+        TransformationEvent tev = new TransformationEvent.Delta(new App(src, src), src, dst);
         App out = (App) new Transformer().apply(tev);
         assertThat(out.getLhs(), is(not(dst)));
         assertThat(out.getRhs(), is(not(dst)));
@@ -137,7 +137,7 @@ public class TestTransformer {
         Var y = new Var("y");
         Var z = new Var("z");
         App a = new App(x, y);
-        Var out = (Var) new Transformer().apply(TransformationEvent.makeSigma(a, a, z));
+        Var out = (Var) new Transformer().apply(new TransformationEvent.Sigma(a, a, z));
         assertThat(out, is(not(z)));
         assertThat(out.getBaseName(), is(z.getBaseName()));
     }

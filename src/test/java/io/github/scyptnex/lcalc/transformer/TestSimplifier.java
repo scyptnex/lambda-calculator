@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
@@ -118,8 +119,8 @@ public class TestSimplifier extends BaseTest{
         Simplifier s = mockApp("ZERO", "\\s z.z", "ONE", "\\s z.s(z)", "SUCC", "\\n s z.s(n s z)");
         Optional<Bi<TransformationEvent, Optional<Computer>>> res = s.findCandidate(parse("f (SUCC ZERO)"));
         assertThat(res, is(not(Optional.empty())));
-        assertThat(res.get().first.type, is(TransformationEvent.TransformType.SIGMA));
-        assertThat(((Var)res.get().first.transformation).getBaseName(), is("ONE"));
+        assertThat(res.get().first, is(instanceOf(TransformationEvent.Sigma.class)));
+        assertThat(((TransformationEvent.Sigma)res.get().first).transformation.getBaseName(), is("ONE"));
     }
 
     @Test
