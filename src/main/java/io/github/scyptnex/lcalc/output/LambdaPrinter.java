@@ -13,10 +13,14 @@ import java.io.PrintStream;
  */
 public abstract class LambdaPrinter {
 
-    protected final PrintStream out;
+    public static final String INDENT = "  ";
+
+    private final PrintStream out;
+    private int indent;
 
     public LambdaPrinter(PrintStream out){
         this.out = out;
+        this.indent = 0;
     }
 
     public abstract void detailAlpha(Term input, Var rename, Term output);
@@ -29,12 +33,31 @@ public abstract class LambdaPrinter {
 
     public abstract String makePrettyString(Term t);
 
+    public void indent(){
+        indent++;
+    }
+
+    public void unindent(){
+        indent = Math.max(indent-1, 0);
+    }
+
+    public int getIndentation() {
+        return indent;
+    }
+
     public void show(String name, Term result) {
-        out.println(name + " - " + makePrettyString(result));
+        line(name + " - " + makePrettyString(result));
+    }
+
+    protected void line(String s){
+        for(int i=0; i<indent; i++){
+            out.print(INDENT);
+        }
+        out.println(s);
     }
 
     public void printLambda(Term l){
-        out.println(makePrettyString(l));
+        line(makePrettyString(l));
     }
 
     public void decode(TransformationEvent tev, Term next, boolean detail){

@@ -6,6 +6,7 @@ import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Var;
 
 import javax.lang.model.element.Name;
+import java.util.Optional;
 
 /**
  * Determines which transformation will be used
@@ -86,10 +87,18 @@ public abstract class TransformationEvent {
     public static class Sigma extends TransformationEvent {
         public final App relevantSubTerm;
         public final Var transformation;
+        public final Optional<Computer> proof;
         public Sigma(Term total, App from, Var to){
             super(total);
             relevantSubTerm = from;
             transformation = to;
+            proof = Optional.empty();
+        }
+        public Sigma(Term total, App from, Var to, Computer pro){
+            super(total);
+            relevantSubTerm = from;
+            transformation = to;
+            proof = Optional.of(pro);
         }
 
         @Override

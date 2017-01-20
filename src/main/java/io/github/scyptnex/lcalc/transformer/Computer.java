@@ -31,11 +31,10 @@ public class Computer {
                 break;
             }
             if(smpl != null){
-                Optional<Bi<TransformationEvent, Optional<Computer>>> simplification = smpl.findCandidate(result);
+                Optional<TransformationEvent.Sigma> simplification = smpl.findCandidate(result);
                 while(simplification.isPresent()){
-                    if(simplification.get().second.isPresent()) steps.addAll(simplification.get().second.get().steps);
-                    steps.add(simplification.get().first);
-                    result = new Transformer().apply(simplification.get().first);
+                    steps.add(simplification.get());
+                    result = new Transformer().apply(simplification.get());
                     simplification = smpl.findCandidate(result);
                 }
             }

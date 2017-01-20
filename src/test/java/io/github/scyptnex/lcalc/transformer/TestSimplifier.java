@@ -117,24 +117,24 @@ public class TestSimplifier extends BaseTest{
     @Test
     public void simplifyMakesTransformEvent() throws Exception {
         Simplifier s = mockApp("ZERO", "\\s z.z", "ONE", "\\s z.s(z)", "SUCC", "\\n s z.s(n s z)");
-        Optional<Bi<TransformationEvent, Optional<Computer>>> res = s.findCandidate(parse("f (SUCC ZERO)"));
+        Optional<TransformationEvent.Sigma> res = s.findCandidate(parse("f (SUCC ZERO)"));
         assertThat(res, is(not(Optional.empty())));
-        assertThat(res.get().first, is(instanceOf(TransformationEvent.Sigma.class)));
-        assertThat(((TransformationEvent.Sigma)res.get().first).transformation.getBaseName(), is("ONE"));
+        assertThat(res.get(), is(instanceOf(TransformationEvent.Sigma.class)));
+        assertThat((res.get()).transformation.getBaseName(), is("ONE"));
     }
 
     @Test
     public void newSimplificationsReturnAComputation() throws Exception {
         Simplifier s = mockApp("ZERO", "\\s z.z", "ONE", "\\s z.s(z)", "SUCC", "\\n s z.s(n s z)");
-        Optional<Bi<TransformationEvent, Optional<Computer>>> res = s.findCandidate(parse("f (SUCC ZERO)"));
-        assertThat(res.get().second, is(not(Optional.empty())));
+        Optional<TransformationEvent.Sigma> res = s.findCandidate(parse("f (SUCC ZERO)"));
+        assertThat(res.get().proof, is(not(Optional.empty())));
     }
 
     @Test
     public void oldSimplificationsOmitTheComputation() throws Exception {
         Simplifier s = mockApp("ZERO", "\\s z.z", "ONE", "\\s z.s(z)", "SUCC", "\\n s z.s(n s z)");
         s.findCandidate(parse("f1 (SUCC ZERO)"));
-        Optional<Bi<TransformationEvent, Optional<Computer>>> res2 = s.findCandidate(parse("f2 (SUCC ZERO)"));
-        assertThat(res2.get().second, is(Optional.empty()));
+        Optional<TransformationEvent.Sigma> res2 = s.findCandidate(parse("f2 (SUCC ZERO)"));
+        assertThat(res2.get().proof, is(Optional.empty()));
     }
 }

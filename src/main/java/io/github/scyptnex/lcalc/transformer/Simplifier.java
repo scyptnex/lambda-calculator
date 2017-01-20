@@ -33,8 +33,10 @@ public class Simplifier {
      * exists return it (as a transformation event (sigma). If it is new, include the
      * computation used to find it
      */
-    public Optional<Bi<TransformationEvent, Optional<Computer>>> findCandidate(Term t){
-        return computeTrueCandidate(t).map(b -> new Bi<>(new TransformationEvent.Sigma(t, b.first, new Var(known.get(desc(b.first)))), b.second));
+    public Optional<TransformationEvent.Sigma> findCandidate(Term t){
+        return computeTrueCandidate(t)
+                .map(b -> b.second.map(c -> new TransformationEvent.Sigma(t, b.first, new Var(known.get(desc(b.first))), c))
+                        .orElseGet(() -> new TransformationEvent.Sigma(t, b.first, new Var(known.get(desc(b.first))))));
     }
 
     /**

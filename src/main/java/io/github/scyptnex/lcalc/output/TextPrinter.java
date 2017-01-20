@@ -26,34 +26,34 @@ public class TextPrinter extends LambdaPrinter implements Visitor<Void, String>{
 
     @Override
     public void detailAlpha(Term input, Var rename, Term output) {
-        out.println("- ALPHA -");
-        out.println(makePrettyString(input) + " <--> " + makePrettyString(rename));
-        out.println("---------");
+        line("- ALPHA -");
+        line(makePrettyString(input) + " <--> " + makePrettyString(rename));
+        line("---------");
     }
 
     @Override
     public void detailBeta(Term input, Fun relevantFunc, Term relevantVal, Term output) {
-        out.println("- BETA  -");
-        out.println(makePrettyString(input));
-        out.println(makePrettyString(relevantFunc.getHead()) + " <- " + makePrettyString(relevantVal));
-        out.println("---------");
+        line("- BETA  -");
+        line(makePrettyString(input));
+        line(makePrettyString(relevantFunc.getHead()) + " <- " + makePrettyString(relevantVal));
+        line("---------");
 
     }
 
     @Override
     public void detailDelta(Term input, Var name, Term def, Term output) {
-        out.println("- DELTA -");
-        out.println(makePrettyString(input));
-        out.println(makePrettyString(name) + " <- " + makePrettyString(def));
-        out.println("---------");
+        line("- DELTA -");
+        line(makePrettyString(input));
+        line(makePrettyString(name) + " <- " + makePrettyString(def));
+        line("---------");
     }
 
     @Override
     public void detailSigma(Term input, App expression, Var result, Term output) {
-        out.println("- SIGMA -");
-        out.println(makePrettyString(input));
-        out.println(makePrettyString(expression) + " => " + makePrettyString(result));
-        out.println("---------");
+        line("- SIGMA -");
+        line(makePrettyString(input));
+        line(makePrettyString(expression) + " => " + makePrettyString(result));
+        line("---------");
     }
 
     @Override

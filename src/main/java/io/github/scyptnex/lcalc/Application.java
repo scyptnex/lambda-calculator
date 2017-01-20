@@ -2,6 +2,7 @@ package io.github.scyptnex.lcalc;
 
 import io.github.scyptnex.lcalc.expression.Term;
 import io.github.scyptnex.lcalc.expression.Util;
+import io.github.scyptnex.lcalc.output.ComputerPrinter;
 import io.github.scyptnex.lcalc.output.LambdaPrinter;
 import io.github.scyptnex.lcalc.output.TextPrinter;
 import io.github.scyptnex.lcalc.parser.ScriptParser;
@@ -92,9 +93,9 @@ public class Application {
         LambdaPrinter lp = TextPrinter.unicode(System.out);
         if(computation != null){
             t = computation.result;
-            if(verb == Verbosity.LOUD || verb == Verbosity.DEAFENING) for(int i=0; i<computation.steps.size(); i++){
-                Term nxt = i+1 < computation.steps.size() ? computation.steps.get(i+1).totalTerm : t;
-                lp.decode(computation.steps.get(i), nxt, verb == Verbosity.DEAFENING);
+            if(verb == Verbosity.LOUD || verb == Verbosity.DEAFENING) {
+                ComputerPrinter cp = new ComputerPrinter(lp);
+                cp.print(t, computation.steps, verb == Verbosity.DEAFENING, verb == Verbosity.DEAFENING);
             }
         }
         lp.printLambda(t);
