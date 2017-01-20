@@ -60,7 +60,7 @@ y <- x
 A more complicated example:
 
 ```
-? YCOMBI (\f n . IF (ISZERO n) ONE (MULT (f (PRED n)) n))
+? YCOMBI λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n) THREE
 
 - DELTA -
 YCOMBI λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n) THREE
@@ -70,40 +70,77 @@ YCOMBI <- λ g.(λ x.g (x x)) λ x.g (x x)
 (λ g.(λ x.g (x x)) λ x.g (x x)) λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n) THREE
 g <- λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)
 ---------
+- ALPHA -
+(λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x) THREE <--> n
+---------
+- ALPHA -
+(λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n'.IF (ISZERO n') ONE (MULT (f (PRED n')) n')) (x x) THREE <--> f
+---------
+- BETA  -
+(λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x) THREE
+x <- λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x)
+---------
 ...
 - BETA  -
-(λ y.y) (MULT ((λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x)) λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x) (PRED THREE)) THREE)
-y <- MULT ((λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x)) λ x.(λ f' n'.IF (ISZERO n') ONE (MULT (f' (PRED n')) n')) (x x) (PRED THREE)) THREE
----------
-...
-- DELTA -
-λ f.ISZERO (PRED (PRED (PRED THREE))) ONE (MULT ((λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x) (PRED (PRED (PRED (PRED THREE))))) (PRED (PRED (PRED THREE)))) (PRED (PRED THREE) (PRED THREE (THREE f)))
-ISZERO <- λ n.n λ x.FALSE TRUE
----------
-...
-- BETA  -
-λ f.(λ y.ONE) (MULT ((λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x) (PRED (PRED (PRED (PRED THREE))))) (PRED (PRED (PRED THREE)))) (PRED (PRED THREE) (PRED THREE (THREE f)))
-y <- MULT ((λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x) (PRED (PRED (PRED (PRED THREE))))) (PRED (PRED (PRED THREE)))
+λ f.(λ y.ONE) (MULT ((λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x) ZERO) ZERO) (ONE (TWO (THREE f)))
+y <- MULT ((λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x)) λ x.(λ f n.IF (ISZERO n) ONE (MULT (f (PRED n)) n)) (x x) ZERO) ZERO
 ---------
 - DELTA -
-λ f.ONE (PRED (PRED THREE) (PRED THREE (THREE f)))
+λ f.ONE (ONE (TWO (THREE f)))
 ONE <- λ s z.s z
 ---------
-...
+- BETA  -
+λ f.(λ s z.s z) (ONE (TWO (THREE f)))
+s <- ONE (TWO (THREE f))
+---------
+- DELTA -
+λ f z.ONE (TWO (THREE f)) z
+ONE <- λ s z.s z
 ---------
 - BETA  -
-λ f z.f (f (f (f (f (f ((λ u'.z) (PRED THREE (THREE f))))))))
-u' <- PRED THREE (THREE f)
+λ f z.(λ s z.s z) (TWO (THREE f)) z
+s <- TWO (THREE f)
+---------
+- BETA  -
+λ f z.(λ z.TWO (THREE f) z) z
+z <- z
+---------
+- DELTA -
+λ f z.TWO (THREE f) z
+TWO <- λ s z.s (s z)
+---------
+- BETA  -
+λ f z.(λ s z.s (s z)) (THREE f) z
+s <- THREE f
+---------
+- BETA  -
+λ f z.(λ z.THREE f (THREE f z)) z
+z <- z
+---------
+- DELTA -
+λ f z.THREE f (THREE f z)
+THREE <- λ s z.s (s (s z))
+---------
+- BETA  -
+λ f z.(λ s z.s (s (s z))) f (THREE f z)
+s <- f
+---------
+- BETA  -
+λ f z.(λ z.f (f (f z))) (THREE f z)
+z <- THREE f z
+---------
+- DELTA -
+λ f z.f (f (f (THREE f z)))
+THREE <- λ s z.s (s (s z))
+---------
+- BETA  -
+λ f z.f (f (f ((λ s z.s (s (s z))) f z)))
+s <- f
+---------
+- BETA  -
+λ f z.f (f (f ((λ z.f (f (f z))) z)))
+z <- z
 ---------
 λ f z.f (f (f (f (f (f z)))))
 ```
 
-Design
-------
-
-TODO
-
-Thanks
-------
-
-  * Wikipedia
